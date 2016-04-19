@@ -1,0 +1,36 @@
+# in-place label of the adjacency matrix
+# Not currently correct
+
+[ 0 1 1]
+[ 1 0 1]
+[ 1 1 0]
+
+would turn into
+
+[ 0 a a]
+[ a 0 a]
+[ a a 0]
+
+alphabet = [a,b,c,d,e,...]
+current_symbol = alphabet.pop_front()
+for row in adjacency:
+    current_clique = [row]
+    for col in upper_diagonal of adjacency[row]:
+        if adjacency[row][col] == 1:
+            adjacency[row][col] = current_symbol
+            adjacency[col][row] = current_symbol
+            current_clique.add(col)
+            for index in adjacency[col]:
+                if adjacency[col][index] == 1:
+                    add = True
+                    for member in current_clique:
+                        if adjacency[index][member] != 1:
+                            add = False
+                            break
+                    if add:
+                        current_clique.add(index)
+                        for member in current_clique:
+                            adjacency[index][member] = current_symbol
+                            adjacency[member][index] = current_symbol
+    current_symbol = alphabet.pop_front()
+    current_clique = [row]
