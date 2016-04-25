@@ -83,6 +83,22 @@ def generate_random_adjacency_matrix(vertices):
     adj.T[upper_tri] = adj[upper_tri]
     return adj
 
+# generatres a random graph adjacency matrix with a given number of edges and vertices
+def generate_random_adjacency_matrix_fixed_edges(vertices, edges):
+    enc = 0b0
+    max_edges = int(vertices*(vertices-1)/2)
+    
+    if edges > max_edges: 
+        edges = max_edges
+
+    added = 0
+    while added != edges:
+        shift = np.random.randint(0,max_edges)
+        if enc & (0b1<<shift) == 0:
+            enc = enc | (0b1<<shift)
+            added = added + 1
+
+    return convert_encoding_to_matrix(vertices,bin(enc)[2:].zfill(max_edges))
 
 # Takes a label dictionary and creates graph neighbor list dictionary
 def make_graph_from_labels(labels):
@@ -217,6 +233,8 @@ def label_random_graphs(vertices):
         print("Number of symbols: {}".format(count_symbols(labels)))
         print("----------------------")
     plt.plot(list(range(2,vertices)), times)
+    plt.xlabel('Number of Vertices', fontsize=14)
+    plt.ylabel('Labeling Algorithm Execution Time', fontsize=14)
     plt.show()
 
 # Runs label_graph on all graphs of order <vertices>
@@ -240,8 +258,86 @@ def label_all_graphs_order_n(vertices):
     print("{} vertices time: {}".format(vertices,time.clock()-total))
     print(edges_dict)
     plt.plot(list(edges_dict.keys()), list(edges_dict.values()))
+    plt.xlabel('Number of Edges', fontsize=14)
+    plt.ylabel('Max Number of Symbols',fontsize=14)
     plt.show()
 
+# Runs label_graph on a random sampling of graphs of order <vertices>
+def label_random_matrices_on_n(vertices):
+    num_edges = int(vertices*(vertices-1)/2)
+    num_graphs = 2*10**5
+    edges_dict = {i:0 for i in range(num_edges+1)}
+    total = time.clock()
+    for i in range(num_graphs):
+        mat = generate_random_adjacency_matrix(vertices)
+        graph = Graph(mat)
+        labels = label_graph(graph)
+        edges = count_edges(graph)
+        num_symbols = count_symbols(labels)
+        if num_symbols > edges_dict[edges]:
+            edges_dict[edges] = num_symbols
+    print("{} vertices time: {}".format(vertices,time.clock()-total))
+    print(edges_dict)
+    plt.plot(list(edges_dict.keys()), list(edges_dict.values()))
+    plt.xlabel('Number of Edges', fontsize=14)
+    plt.ylabel('Max Number of Symbols',fontsize=14)
+    plt.show()
+
+
+# Outputs the number of labels of a Turan Graph without 3-cliques
+def label_graphs_without_cliques(vertices):
+    adj_list = generate_turan_graph(vertices,2)
+    mat = convert_to_mat(adj_list)
+    graph = Graph(mat)
+    labels = label_graph(graph)
+    edges = count_edges(graph)
+    num_symbols = count_symbols(labels)
+
+    print("Number of edges: {}".format(edges))
+    print("Number of symbols: {}".format(num_symbols))
+
+# Outputs the number of symbols for a graph of order n on a random
+# sampling of all numbers of edges
+def label_graphs_with_random_edges(vertices):
+    max_edges = int(vertices*(vertices-1)/2)
+    edges_dict = {i:0 for i in range(max_edges+1)}
+
+    sample_size = 10
+    total = time.clock()
+    for i in range(max_edges+1):
+        for j in range(sample_size):
+            mat = generate_random_adjacency_matrix_fixed_edges(vertices,i)
+            graph = Graph(mat)
+            labels = label_graph(graph)
+            num_symbols = count_symbols(labels)
+            if num_symbols > edges_dict[i]:
+                edges_dict[i] = num_symbols
+        print("...{0:.0f}%".format(i/(max_edges+1) * 100))
+    print("{} vertices time: {}".format(vertices,time.clock()-total))
+    print(edges_dict)
+    plt.plot(list(edges_dict.keys()), list(edges_dict.values()))
+    plt.xlabel('Number of Edges', fontsize=14)
+    plt.ylabel('Max Number of Symbols',fontsize=14)
+    plt.show()
+    
+# Outputs an average running time for random graphs on the range 
+# 2 to the given number of vertices
+def label_random_graph_time(vertices):
+    times = {i:0 for i in range(1,vertices)}
+    sample_size = 1000
+    for i in range(2,vertices):
+        print("Number of Vertices: {}".format(i))
+        for j in range(sample_size):
+            adj = generate_random_adjacency_matrix(i).tolist()
+            graph = Graph(adj)
+            t_label = time.clock()
+            labels = label_graph(graph)
+            times[i] += time.clock() - t_label
+    avg_times = {k: v/sample_size for k,v in times.items()}
+    plt.plot(list(avg_times.keys()), list(avg_times.values()))
+    plt.xlabel('Number of Vertices', fontsize=14)
+    plt.ylabel('Average Running Time (seconds)', fontsize=14)
+    plt.show()
 
 # Bill's graph of 3-cliques
 #{   0: [1, 2, 4, 5, 7, 8],
