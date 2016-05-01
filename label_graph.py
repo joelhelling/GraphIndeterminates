@@ -3,6 +3,7 @@ import argparse
 import random
 import time
 import itertools
+import math
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -323,9 +324,9 @@ def label_graphs_with_random_edges(vertices):
 # Outputs an average running time for random graphs on the range 
 # 2 to the given number of vertices
 def label_random_graph_time(vertices):
-    times = {i:0 for i in range(1,vertices)}
-    sample_size = 1000
-    for i in range(2,vertices):
+    times = {i:0 for i in range(10,vertices+1)}
+    sample_size = 100
+    for i in range(10,vertices+1):
         print("Number of Vertices: {}".format(i))
         for j in range(sample_size):
             adj = generate_random_adjacency_matrix(i).tolist()
@@ -334,6 +335,21 @@ def label_random_graph_time(vertices):
             labels = label_graph(graph)
             times[i] += time.clock() - t_label
     avg_times = {k: v/sample_size for k,v in times.items()}
+    run_time = []
+    for i in range(10,vertices):
+        j = i + 1
+        r = j/i
+        run_time.append((i,j,r,r**2,r**3,avg_times[j]/avg_times[i]))
+    
+    
+    #plt.plot([i[0] for i in run_time],[i[5] for i in run_time])
+    #plt.plot([i[0] for i in run_time],[i[2] for i in run_time])
+    #plt.plot([i[0] for i in run_time],[i[3] for i in run_time])
+    #plt.plot([i[0] for i in run_time],[i[4] for i in run_time])
+    #plt.legend(['T(n+1)/T(n)','r','r^2','r^3'], loc='upper right')
+    #plt.xlabel('Number of Vertices', fontsize=14)
+    #plt.ylabel('Ratio of n to n + 1 (r = (n+1)/n)', fontsize=14)
+    #plt.show()
     plt.plot(list(avg_times.keys()), list(avg_times.values()))
     plt.xlabel('Number of Vertices', fontsize=14)
     plt.ylabel('Average Running Time (seconds)', fontsize=14)
