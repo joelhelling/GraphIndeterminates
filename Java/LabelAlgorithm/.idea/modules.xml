@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/LabelAlgorithm.iml" filepath="$PROJECT_DIR$/.idea/modules/LabelAlgorithm.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/LabelAlgorithm_main.iml" filepath="$PROJECT_DIR$/.idea/modules/LabelAlgorithm_main.iml" group="LabelAlgorithm" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/LabelAlgorithm_test.iml" filepath="$PROJECT_DIR$/.idea/modules/LabelAlgorithm_test.iml" group="LabelAlgorithm" />
+    </modules>
+  </component>
+</project>
