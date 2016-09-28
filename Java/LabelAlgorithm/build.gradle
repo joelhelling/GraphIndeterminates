@@ -5,7 +5,9 @@ apply plugin: 'java'
 apply plugin: 'idea'
 
 sourceCompatibility = 1.8
+sourceRelease = 1.8
 targetCompatability = 1.8
+targetRelease = 1.8
 
 repositories {
     mavenCentral()
