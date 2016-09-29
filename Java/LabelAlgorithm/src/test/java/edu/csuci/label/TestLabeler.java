@@ -1,4 +1,4 @@
-package edu.csuci.thesislabel;
+package edu.csuci.label;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -11,20 +11,20 @@ import java.util.*;
 public class TestLabeler {
     @Test
     public void givenAnEmptyLabelingShouldReturnEmpty() {
-        Map<Integer, Set<Integer>> empty = Collections.emptyMap();
-        Assert.assertEquals(Labeler.labelGraph(empty), Collections.emptyMap());
+        List<Set<Integer>> empty = Collections.emptyList();
+        Assert.assertEquals(Labeler.labelGraph(empty), Collections.emptyList());
     }
 
     @Test
     public void givenAGraphWithNoEdgesShouldReturnOneLabelPerVertex() {
-        Map<Integer, Set<Integer>> graphNoEdges = new HashMap<>();
+        List<Set<Integer>> graphNoEdges = new ArrayList<>(10);
         for (int i = 0; i < 10; i++) {
-            graphNoEdges.put(i, new TreeSet<>());
+            graphNoEdges.add(new HashSet<>());
         }
 
-        Map<Integer, List<Integer>> result = new HashMap<>();
+        List<Set<Integer>> result = new ArrayList<>();
         for (int i = 0; i < 10; i++) {
-            result.put(i, new ArrayList<>(1));
+            result.add(new HashSet<>());
             result.get(i).add(i);
         }
 

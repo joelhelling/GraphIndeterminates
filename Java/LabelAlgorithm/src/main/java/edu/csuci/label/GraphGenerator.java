@@ -1,4 +1,4 @@
-package edu.csuci.thesislabel;
+package edu.csuci.label;
 
 import java.util.*;
 
@@ -6,12 +6,12 @@ import java.util.*;
  * Created by Joel on 9/28/2016.
  */
 public class GraphGenerator {
-    public static Map<Integer, Set<Integer>> transformToMap(int[][] adjMatrix) {
-        Map<Integer, Set<Integer>> result = new HashMap<>(adjMatrix.length);
-
+    public static List<Set<Integer>> transformToList(int[][] adjMatrix) {
+        List<Set<Integer>> result = new ArrayList<>(adjMatrix.length);
         for (int i = 0; i < adjMatrix.length; i++) {
-            result.put(i, new HashSet<>());
+            result.add(i, new HashSet<>(adjMatrix.length));
         }
+
         for (int i = 0; i < adjMatrix.length; i++) {
             for (int j = 0; j < adjMatrix[i].length; j++) {
                 if (i != j && adjMatrix[i][j] == 1) {
@@ -23,7 +23,7 @@ public class GraphGenerator {
         return result;
     }
 
-    public static Map<Integer, Set<Integer>> randomGraph(int n, double density, Random rng) {
+    public static List<Set<Integer>> randomGraph(int n, double density, Random rng) {
         int[][] result = new int[n][n];
 
         for (int i = 0; i < result.length; i++) {
@@ -37,6 +37,6 @@ public class GraphGenerator {
                 }
             }
         }
-        return GraphGenerator.transformToMap(result);
+        return GraphGenerator.transformToList(result);
     }
 }
