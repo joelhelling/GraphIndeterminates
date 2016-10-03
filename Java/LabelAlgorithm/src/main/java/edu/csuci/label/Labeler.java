@@ -64,4 +64,43 @@ public class Labeler {
         }
         return labels;
     }
+
+    // Recreate the graph from the labels and compare the original graph for correctness
+    public static boolean checkLabeling(List<Set<Integer>> graph, List<Set<Integer>> labels) {
+        List<Set<Integer>> result = new ArrayList<>(labels.size());
+        for (int i = 0; i < labels.size(); i++) {
+            result.add(i, new HashSet<>(result.size()));
+        }
+
+        for (int i = 0; i < labels.size(); i++) {
+            for (int j = i + 1; j < labels.size(); j++) {
+                Set<Integer> intersection = new HashSet<>(labels.get(i));
+                intersection.retainAll(labels.get(j));
+                if (!intersection.isEmpty()) {
+                    result.get(i).add(j);
+                    result.get(j).add(i);
+                }
+            }
+        }
+        return graph.equals(result);
+    }
+
+    public static int countLabels(List<Set<Integer>> labels) {
+        return labels.stream().map(Set::size).reduce(0, (x,y) -> x + y);
+    }
+
+    public static void printLabels(List<Set<Integer>> labels) {
+        StringBuilder res = new StringBuilder();
+        res.append("Labels:\n");
+        int line = 0;
+        for (Set<Integer> vertexLabels : labels) {
+            res.append((line++) + ": [");
+            for (Integer i : vertexLabels) {
+                res.append(i.toString() + ", ");
+            }
+            res.delete(res.length()-2, res.length());
+            res.append("]\n");
+        }
+        System.out.println(res.toString());
+    }
 }

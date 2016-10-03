@@ -39,4 +39,23 @@ public class GraphGenerator {
         }
         return GraphGenerator.transformToList(result);
     }
+
+    public static int countEdges(List<Set<Integer>> graph) {
+        return graph.stream().map(Set::size).reduce(0, (x,y) -> x + y)/2;
+    }
+
+    public static void printGraph(List<Set<Integer>> graph) {
+        StringBuilder res = new StringBuilder();
+        res.append("Graph:\n");
+        int line = 0;
+        for (Set<Integer> neighbors : graph) {
+            res.append((line++) + ": [");
+            for (Integer i : neighbors) {
+                res.append(i.toString() + ", ");
+            }
+            res.delete(res.length()-2, res.length());
+            res.append("]\n");
+        }
+        System.out.println(res.toString());
+    }
 }
