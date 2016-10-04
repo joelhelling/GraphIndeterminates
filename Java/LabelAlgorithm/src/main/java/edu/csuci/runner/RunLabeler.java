@@ -45,9 +45,10 @@ public class RunLabeler {
             Labeler.printLabels(result);
 
             start = System.currentTimeMillis();
-            boolean passed = Labeler.checkLabeling(testData, result);
+            List<Set<Integer>> check = Labeler.checkLabeling(result);
+            GraphGenerator.printGraph(check);
             end = System.currentTimeMillis();
-            System.out.printf("Check %d: %b %d ms\n", i+1, (passed)?"PASSED":"FAILED", end - start);
+            System.out.printf("Check %d: %b %d ms\n", i+1, (check.equals(testData))?"PASSED":"FAILED", end - start);
         }
         System.out.printf("Total %s Time: %d ms\n", trialName, totalTime);
         System.out.printf("Average %s Time per Graph: %d ms\n", trialName, totalTime/iterations);
