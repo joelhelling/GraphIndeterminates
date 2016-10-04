@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Created by jhelling on 9/28/16.
@@ -37,22 +38,23 @@ public class Labeler {
                 for (Integer w : vNeighbors) {
                     if (connections[v][w] == 0) {
                         currentClique.add(w);
+                        labels.get(v).add(lambda);
+                        labels.get(w).add(lambda);
                         // Check through neighbors of v again to add to clique
                         for (Integer q : vNeighbors) {
                             if (!q.equals(w) && graph.get(q).containsAll(currentClique)) {
+                                labels.get(q).add(lambda);
                                 currentClique.add(q);
                             }
                         }
-                        labels.get(v).add(lambda);
                         while (!currentClique.isEmpty()) {
                             Integer c = currentClique.iterator().next();
-                            labels.get(c).add(lambda);
                             currentClique.remove(c);
+                            connections[c][v] = 1;
+                            connections[v][c] = 1;
                             for (Integer d : currentClique) {
                                 connections[c][d] = 1;
                                 connections[d][c] = 1;
-                                connections[c][v] = 1;
-                                connections[v][c] = 1;
                                 connections[d][v] = 1;
                                 connections[v][d] = 1;
                             }
@@ -66,7 +68,7 @@ public class Labeler {
     }
 
     // Recreate the graph from the labels and compare the original graph for correctness
-    public static boolean checkLabeling(List<Set<Integer>> graph, List<Set<Integer>> labels) {
+    public static List<Set<Integer>> checkLabeling(List<Set<Integer>> labels) {
         List<Set<Integer>> result = new ArrayList<>(labels.size());
         for (int i = 0; i < labels.size(); i++) {
             result.add(i, new HashSet<>(result.size()));
@@ -82,11 +84,11 @@ public class Labeler {
                 }
             }
         }
-        return graph.equals(result);
+        return result;
     }
 
     public static int countLabels(List<Set<Integer>> labels) {
-        return labels.stream().map(Set::size).reduce(0, (x,y) -> x + y);
+        return labels.stream().flatMap(Set::stream).collect(Collectors.toSet()).size();
     }
 
     public static void printLabels(List<Set<Integer>> labels) {
@@ -94,11 +96,13 @@ public class Labeler {
         res.append("Labels:\n");
         int line = 0;
         for (Set<Integer> vertexLabels : labels) {
-            res.append((line++) + ": [");
+            res.append(line++).append(": [");
             for (Integer i : vertexLabels) {
-                res.append(i.toString() + ", ");
+                res.append(i.toString()).append(", ");
             }
-            res.delete(res.length()-2, res.length());
+            if (vertexLabels.size() > 0) {
+                res.delete(res.length() - 2, res.length());
+            }
             res.append("]\n");
         }
         System.out.println(res.toString());

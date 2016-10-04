@@ -53,7 +53,9 @@ public class GraphGenerator {
             for (Integer i : neighbors) {
                 res.append(i.toString() + ", ");
             }
-            res.delete(res.length()-2, res.length());
+            if (neighbors.size() > 0) {
+                res.delete(res.length() - 2, res.length());
+            }
             res.append("]\n");
         }
         System.out.println(res.toString());
