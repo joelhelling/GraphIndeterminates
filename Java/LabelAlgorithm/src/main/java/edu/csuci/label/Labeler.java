@@ -67,6 +67,74 @@ public class Labeler {
         return labels;
     }
 
+    public static int[][] fastLabelGraph(int[][] graph) {
+        int[][] labels = new int[graph.length][graph.length];
+        int[][] connections = new int[graph.length][graph.length];
+
+        int[] indexes = new int[graph.length];
+        int[] currentClique = new int[graph.length];
+        int ccIndex = 0;
+
+        int lambda = 1;
+
+        int v;
+        int w;
+        int q;
+
+        boolean isSubset;
+        int qi;
+
+        int cci, ccj;
+
+        for (v = 0; v < graph.length; v++) {
+            if (graph[v][v] == 0) {
+                labels[v][indexes[v]++] = lambda;
+                lambda++;
+            } else {
+                for (w = v+1; w < graph.length; w++) {
+                    if (graph[v][w] == 0) {
+                        continue;
+                    }
+                    if (connections[v][w] == 0) {
+                        currentClique[ccIndex++] = w;
+                        labels[v][indexes[v]++] = lambda;
+                        labels[w][indexes[w]++] = lambda;
+
+                        for (q = w+1; q < graph.length; q++) {
+                            if (graph[v][q] == 0) {
+                                continue;
+                            }
+                            isSubset = true;
+                            for (qi = 0; qi < ccIndex; qi++) {
+                                if (graph[q][currentClique[qi]] == 0) {
+                                    isSubset = false;
+                                    break;
+                                }
+                            }
+                            if (isSubset) {
+                                currentClique[ccIndex++] = q;
+                                labels[q][indexes[q]++] = lambda;
+                            }
+                        }
+
+                        for (cci = 0; cci < ccIndex; cci++) {
+                            connections[v][currentClique[cci]] = 1;
+                            connections[currentClique[cci]][v] = 1;
+                            for (ccj = cci+1; ccj < ccIndex; ccj++) {
+                                connections[currentClique[cci]][currentClique[ccj]] = 1;
+                                connections[currentClique[ccj]][currentClique[cci]] = 1;
+                            }
+                            currentClique[cci] = 0;
+                        }
+                        ccIndex = 0;
+                        lambda++;
+                    }
+                }
+            }
+        }
+        return labels;
+    }
+
     // Recreate the graph from the labels and compare the original graph for correctness
     public static List<Set<Integer>> checkLabeling(List<Set<Integer>> labels) {
         List<Set<Integer>> result = new ArrayList<>(labels.size());
@@ -91,6 +159,16 @@ public class Labeler {
         return labels.stream().flatMap(Set::stream).collect(Collectors.toSet()).size();
     }
 
+    public static int countLabels(int[][] labels) {
+        Set<Integer> count = new HashSet<>(labels.length);
+        for (int i = 0; i < labels.length; i++) {
+            for (int j = 0; j < labels[i].length && labels[i][j] != 0; j++) {
+                count.add(labels[i][j]);
+            }
+        }
+        return count.size();
+    }
+
     public static void printLabels(List<Set<Integer>> labels) {
         StringBuilder res = new StringBuilder();
         res.append("Labels:\n");
@@ -103,6 +181,21 @@ public class Labeler {
             if (vertexLabels.size() > 0) {
                 res.delete(res.length() - 2, res.length());
             }
+            res.append("]\n");
+        }
+        System.out.println(res.toString());
+    }
+
+    public static void printLabels(int[][] labels) {
+        StringBuilder res = new StringBuilder();
+        res.append("Labels:\n");
+
+        for (int i = 0; i < labels.length; i++) {
+            res.append(i).append(": [");
+            for (int j = 0; j < labels.length && labels[i][j] != 0; j++) {
+                res.append(labels[i][j]).append(", ");
+            }
+            res.delete(res.length() - 2, res.length());
             res.append("]\n");
         }
         System.out.println(res.toString());

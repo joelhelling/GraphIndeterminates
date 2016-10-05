@@ -4,6 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by jhelling on 9/28/16.
@@ -32,7 +33,23 @@ public class TestLabeler {
     }
 
     @Test
-    public void GivenAGraphWithOneEdgeShouldReturnOneLessThanNumberOfVertices() {
+    public void givenAGraphThatContainsThreeCliqueThenUseThreeLabels() {
+        int[][] graph = {{1,1,0,1,1},{1,1,0,0,1},{0,0,1,0,1},{1,0,0,1,1},{1,1,1,1,1}};
 
+        int[][] labels = Labeler.fastLabelGraph(graph);
+
+        List<List<Integer>> l = new ArrayList<>(labels.length);
+        for (int i = 0; i < labels.length; i++) {
+            l.add(Arrays.stream(labels[i]).boxed().collect(Collectors.toList()));
+        }
+
+        int[][] resultLabels = {{1,2,0,0,0},{1,0,0,0,0},{3,0,0,0,0},{2,0,0,0,0},{1,2,3,0,0}};
+        List<List<Integer>> rl = new ArrayList<>(resultLabels.length);
+        for (int i = 0; i < resultLabels.length; i++) {
+            rl.add(Arrays.stream(resultLabels[i]).boxed().collect(Collectors.toList()));
+        }
+
+
+        Assert.assertEquals(rl, l);
     }
 }

@@ -22,6 +22,7 @@ public class RunLabeler {
         Random rng = new Random(System.currentTimeMillis());
         OptionParser parser = new OptionParser();
         OptionSpec<Void> nvertices = parser.accepts("nvertices", "Runs the labeling algorithm on random graphs with specified vertices");
+        OptionSpec<Void> fastVertices = parser.accepts("fnvertices", "Runs the optimized labeling algorithm on random graphs with specified vertices");
         OptionSpec<Void> debug = parser.accepts("debug", "If specified, runs checking algorithm and prints out results");
 
         OptionSpec<Void> help = parser.acceptsAll(Arrays.asList("help","h"), "Help").forHelp();
@@ -60,6 +61,13 @@ public class RunLabeler {
             try {
                 RunLabeler.runTrialsNVertices("Warm-up", warmUp.value(options), vertices.value(options), density.value(options), rng, options.has(debug), output);
                 RunLabeler.runTrialsNVertices("Benchmark", iterations.value(options), vertices.value(options), density.value(options), rng, options.has(debug), output);
+            } catch (IOException ioe) {
+                System.out.println("File opening error: " + ioe);
+            }
+        } else if (options.has(fastVertices)) {
+            try {
+                RunLabeler.runFastTrialsNVertices("Warm-up", warmUp.value(options), vertices.value(options), density.value(options), rng, options.has(debug), output);
+                RunLabeler.runFastTrialsNVertices("Benchmark", iterations.value(options), vertices.value(options), density.value(options), rng, options.has(debug), output);
             } catch (IOException ioe) {
                 System.out.println("File opening error: " + ioe);
             }
@@ -140,6 +148,49 @@ public class RunLabeler {
                 end = System.currentTimeMillis();
                 System.out.printf("Check %d: %b %d ms\n", i + 1, (check.equals(testData)) ? "PASSED" : "FAILED", end - start);
             }
+        }
+        System.out.printf("Total %s Time: %d ms\n", trialName, totalTime);
+        System.out.printf("Average %s Time per Graph: %d ms\n", trialName, totalTime/iterations);
+        System.out.println("=== Ending " + trialName + " Phase ===");
+    }
+
+    private static void runFastTrialsNVertices(String trialName, int iterations, int vertices, double density, Random rng, boolean debug, PrintStream output)  throws IOException {
+        long totalTime, start, end;
+        System.out.println("=== Starting " + trialName + " Phase ===");
+        output.printf("Trial: %s with %d vertices\n", trialName, vertices);
+        output.println("Edges -- Labels -- Time (milliseconds)");
+        totalTime = 0;
+        for (int i = 0; i < iterations; i++) {
+            start = System.currentTimeMillis();
+            int[][] testData = GraphGenerator.fastRandomGraph(vertices, density, rng);
+            end = System.currentTimeMillis();
+            int edges = GraphGenerator.countEdges(testData);
+            System.out.printf("Setup %d: %d ms\n", i+1, end - start);
+            System.out.printf("Vertices: %d; Density: %f; Edges: %d\n", vertices, density, edges);
+            if (debug) {
+                GraphGenerator.printGraph(testData);
+            }
+
+            start = System.currentTimeMillis();
+            int[][] result = Labeler.fastLabelGraph(testData);
+            end = System.currentTimeMillis();
+            totalTime += end - start;
+            int labels = Labeler.countLabels(result);
+            System.out.printf("Run %d: %d Labels; %d ms\n", i+1, labels, end - start);
+            output.printf("%d\t%d\t%d\n", edges, labels, end - start);
+            if (debug) {
+                Labeler.printLabels(result);
+            }
+
+            /*
+            if (debug) {
+                start = System.currentTimeMillis();
+                List<Set<Integer>> check = Labeler.checkLabeling(result);
+                GraphGenerator.printGraph(check);
+                end = System.currentTimeMillis();
+                System.out.printf("Check %d: %b %d ms\n", i + 1, (check.equals(testData)) ? "PASSED" : "FAILED", end - start);
+            }
+            */
         }
         System.out.printf("Total %s Time: %d ms\n", trialName, totalTime);
         System.out.printf("Average %s Time per Graph: %d ms\n", trialName, totalTime/iterations);
