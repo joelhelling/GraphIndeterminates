@@ -6,7 +6,9 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
@@ -31,8 +33,22 @@ public class RunLabeler {
                 .withRequiredArg().ofType(Integer.class).required();
         OptionSpec<Double> density = parser.acceptsAll(Arrays.asList("d","density"), "Between 0.0 and 1.0. Probability of having an edge between two vertices")
                 .withRequiredArg().ofType(Double.class).required();
+        OptionSpec<String> file = parser.acceptsAll(Arrays.asList("o", "output"), "The file to output data to").withRequiredArg().ofType(String.class);
 
         OptionSet options = parser.parse(args);
+
+        PrintStream output;
+        if (options.has(file)) {
+            try {
+                output = new PrintStream(file.value(options));
+            } catch (FileNotFoundException fnfe) {
+                System.out.println(fnfe);
+                System.out.println("Using System.out instead...");
+                output = System.out;
+            }
+        } else {
+            output = System.out;
+        }
 
         if (options.has(help)) {
             try {
@@ -40,9 +56,13 @@ public class RunLabeler {
             } catch (IOException ioe) {
                 System.out.println(ioe);
             }
-        } else if (options.has(nvertices)){
-            RunLabeler.runTrialsNVertices("Warm-up", warmUp.value(options), vertices.value(options), density.value(options), rng, options.has(debug));
-            RunLabeler.runTrialsNVertices("Benchmark", iterations.value(options), vertices.value(options), density.value(options), rng, options.has(debug));
+        } else if (options.has(nvertices)) {
+            try {
+                RunLabeler.runTrialsNVertices("Warm-up", warmUp.value(options), vertices.value(options), density.value(options), rng, options.has(debug), output);
+                RunLabeler.runTrialsNVertices("Benchmark", iterations.value(options), vertices.value(options), density.value(options), rng, options.has(debug), output);
+            } catch (IOException ioe) {
+                System.out.println("File opening error: " + ioe);
+            }
         } else {
             try {
                 parser.printHelpOn(System.out);
@@ -50,6 +70,7 @@ public class RunLabeler {
                 System.out.println(ioe);
             }
         }
+        output.close();
     }
 
     private static void runTrials(String trialName, int iterations, int lowerBound, int upperBound, double density, Random rng) {
@@ -84,16 +105,19 @@ public class RunLabeler {
         System.out.println("=== Ending " + trialName + " Phase ===");
     }
 
-    private static void runTrialsNVertices(String trialName, int iterations, int vertices, double density, Random rng, boolean debug) {
+    private static void runTrialsNVertices(String trialName, int iterations, int vertices, double density, Random rng, boolean debug, PrintStream output)  throws IOException {
         long totalTime, start, end;
         System.out.println("=== Starting " + trialName + " Phase ===");
+        output.printf("Trial: %s with %d vertices\n", trialName, vertices);
+        output.println("Edges -- Labels -- Time (milliseconds)");
         totalTime = 0;
         for (int i = 0; i < iterations; i++) {
             start = System.currentTimeMillis();
             List<Set<Integer>> testData = GraphGenerator.randomGraph(vertices, density, rng);
             end = System.currentTimeMillis();
+            int edges = GraphGenerator.countEdges(testData);
             System.out.printf("Setup %d: %d ms\n", i+1, end - start);
-            System.out.printf("Vertices: %d; Density: %f; Edges: %d\n", vertices, density, GraphGenerator.countEdges(testData));
+            System.out.printf("Vertices: %d; Density: %f; Edges: %d\n", vertices, density, edges);
             if (debug) {
                 GraphGenerator.printGraph(testData);
             }
@@ -102,7 +126,9 @@ public class RunLabeler {
             List<Set<Integer>> result = Labeler.labelGraph(testData);
             end = System.currentTimeMillis();
             totalTime += end - start;
-            System.out.printf("Run %d: %d Labels; %d ms\n", i+1, Labeler.countLabels(result), end - start);
+            int labels = Labeler.countLabels(result);
+            System.out.printf("Run %d: %d Labels; %d ms\n", i+1, labels, end - start);
+            output.printf("%d\t%d\t%d\n", edges, labels, end - start);
             if (debug) {
                 Labeler.printLabels(result);
             }
