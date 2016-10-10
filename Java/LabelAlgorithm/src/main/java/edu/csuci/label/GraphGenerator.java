@@ -43,8 +43,8 @@ public class GraphGenerator {
     public static int[][] fastRandomGraph(int n, double density, Random rng) {
         int[][] graph = new int[n][n];
 
-        for (int i = 0; i < graph.length; i++) {
-           for (int j = 0; j < graph[i].length; j++) {
+        for (int i = 1; i < graph.length; i++) {
+           for (int j = i+1; j < graph[i].length; j++) {
                if (i != j) {
                    if (rng.nextDouble() <= density) {
                        graph[i][i] = 1;
@@ -107,6 +107,21 @@ public class GraphGenerator {
                 res.delete(res.length() - 2, res.length());
             }
             res.append("] hasNeighbors:").append(hasNeighbors).append("\n");
+        }
+        System.out.println(res.toString());
+    }
+
+    public static void printAdjacencyMatrix(int[][] graph) {
+        StringBuilder res = new StringBuilder();
+        res.append("Matrix:\n");
+
+        for (int i = 0; i < graph.length; i++) {
+            res.append(i).append(": [");
+            for (int j = 0; j < graph.length; j++) {
+                res.append(graph[i][j]).append(", ");
+            }
+            res.delete(res.length() - 2, res.length());
+            res.append("]").append("\n");
         }
         System.out.println(res.toString());
     }

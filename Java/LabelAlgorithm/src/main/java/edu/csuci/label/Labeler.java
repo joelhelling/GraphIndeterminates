@@ -68,11 +68,27 @@ public class Labeler {
     }
 
     public static int[][] fastLabelGraph(int[][] graph) {
-        int[][] labels = new int[graph.length][graph.length];
+        int[][] labels = new int[graph.length][graph.length*2];
+        for (int i = 0; i < labels.length; i++) {
+            for (int j = 0; j < labels[i].length; j++) {
+                labels[i][j] = 0;
+            }
+        }
         int[][] connections = new int[graph.length][graph.length];
+        for (int i = 0; i < connections.length; i++) {
+            for (int j = 0; j < connections[i].length; j++) {
+                connections[i][j] = 0;
+            }
+        }
 
         int[] indexes = new int[graph.length];
+        for (int i = 0; i < indexes.length; i++) {
+            indexes[i] = 0;
+        }
         int[] currentClique = new int[graph.length];
+        for (int i = 0; i < currentClique.length; i++) {
+            currentClique[i] = 0;
+        }
         int ccIndex = 0;
 
         int lambda = 1;
