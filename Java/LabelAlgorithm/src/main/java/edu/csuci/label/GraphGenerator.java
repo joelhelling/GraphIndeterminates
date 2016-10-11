@@ -73,6 +73,17 @@ public class GraphGenerator {
         return count;
     }
 
+    public static boolean graphEquals(int[][] src, int[][] test) {
+        for (int i = 0; i < src.length; i++) {
+            for (int j = 0; j < src[i].length; j++) {
+                if (src[i][j] != test[i][j]) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     public static void printGraph(List<Set<Integer>> graph) {
         StringBuilder res = new StringBuilder();
         res.append("Graph:\n");

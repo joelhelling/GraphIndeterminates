@@ -67,8 +67,28 @@ public class Labeler {
         return labels;
     }
 
-    public static int[][] fastLabelGraph(int[][] graph) {
-        int[][] labels = new int[graph.length][graph.length*2];
+    // Recreate the graph from the labels and compare the original graph for correctness
+    public static List<Set<Integer>> checkLabeling(List<Set<Integer>> labels) {
+        List<Set<Integer>> result = new ArrayList<>(labels.size());
+        for (int i = 0; i < labels.size(); i++) {
+            result.add(i, new HashSet<>(result.size()));
+        }
+
+        for (int i = 0; i < labels.size(); i++) {
+            for (int j = i + 1; j < labels.size(); j++) {
+                Set<Integer> intersection = new HashSet<>(labels.get(i));
+                intersection.retainAll(labels.get(j));
+                if (!intersection.isEmpty()) {
+                    result.get(i).add(j);
+                    result.get(j).add(i);
+                }
+            }
+        }
+        return result;
+    }
+
+    public static int[][] labelGraph(int[][] graph) {
+        int[][] labels = new int[graph.length][graph.length*graph.length/4 + 1];
         for (int i = 0; i < labels.length; i++) {
             for (int j = 0; j < labels[i].length; j++) {
                 labels[i][j] = 0;
@@ -151,24 +171,38 @@ public class Labeler {
         return labels;
     }
 
-    // Recreate the graph from the labels and compare the original graph for correctness
-    public static List<Set<Integer>> checkLabeling(List<Set<Integer>> labels) {
-        List<Set<Integer>> result = new ArrayList<>(labels.size());
-        for (int i = 0; i < labels.size(); i++) {
-            result.add(i, new HashSet<>(result.size()));
-        }
+    public static int[][] checkLabeling(int[][] labels) {
+        int[][] graph = new int[labels.length][labels.length];
 
-        for (int i = 0; i < labels.size(); i++) {
-            for (int j = i + 1; j < labels.size(); j++) {
-                Set<Integer> intersection = new HashSet<>(labels.get(i));
-                intersection.retainAll(labels.get(j));
-                if (!intersection.isEmpty()) {
-                    result.get(i).add(j);
-                    result.get(j).add(i);
+        for (int i = 0; i < graph.length; i++) {
+            for (int j = i+1; j < graph[i].length; j++) {
+                if (hasIntersection(labels[i], labels[j])) {
+                    graph[i][i] = 1;
+                    graph[i][j] = 1;
+                    graph[j][i] = 1;
+                } else {
+                    graph[i][j] = 0;
+                    graph[j][i] = 0;
                 }
             }
         }
-        return result;
+        return graph;
+    }
+
+    private static boolean hasIntersection(int[] fLabels, int[] sLabels) {
+        int fIndex = 0;
+        int sIndex = 0;
+
+        while(fIndex < fLabels.length && fLabels[fIndex] != 0) {
+            while(sIndex < sLabels.length && sLabels[sIndex] != 0 && sLabels[sIndex] <= fLabels[fIndex]) {
+                if (sLabels[sIndex] == fLabels[fIndex]) {
+                    return true;
+                }
+                sIndex++;
+            }
+            fIndex++;
+        }
+        return false;
     }
 
     public static int countLabels(List<Set<Integer>> labels) {

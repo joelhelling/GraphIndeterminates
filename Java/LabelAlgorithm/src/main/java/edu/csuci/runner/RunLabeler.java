@@ -23,6 +23,7 @@ public class RunLabeler {
         OptionParser parser = new OptionParser();
         OptionSpec<Void> nvertices = parser.accepts("nvertices", "Runs the labeling algorithm on random graphs with specified vertices");
         OptionSpec<Void> fastVertices = parser.accepts("fnvertices", "Runs the optimized labeling algorithm on random graphs with specified vertices");
+        OptionSpec<Void> ascending = parser.accepts("ascending", "Runs the optimized labeling algorithm on random graphs ");
         OptionSpec<Void> debug = parser.accepts("debug", "If specified, runs checking algorithm and prints out results");
 
         OptionSpec<Void> help = parser.acceptsAll(Arrays.asList("help","h"), "Help").forHelp();
@@ -33,7 +34,7 @@ public class RunLabeler {
         OptionSpec<Integer> vertices = parser.acceptsAll(Arrays.asList("v","vertices"), "The number of vertices in the generated graphs")
                 .withRequiredArg().ofType(Integer.class).required();
         OptionSpec<Double> density = parser.acceptsAll(Arrays.asList("d","density"), "Between 0.0 and 1.0. Probability of having an edge between two vertices")
-                .withRequiredArg().ofType(Double.class).required();
+                .withRequiredArg().ofType(Double.class).defaultsTo(0.5);
         OptionSpec<String> file = parser.acceptsAll(Arrays.asList("o", "output"), "The file to output data to").withRequiredArg().ofType(String.class);
 
         OptionSet options = parser.parse(args);
@@ -68,6 +69,12 @@ public class RunLabeler {
             try {
                 RunLabeler.runFastTrialsNVertices("Warm-up", warmUp.value(options), vertices.value(options), density.value(options), rng, options.has(debug), output);
                 RunLabeler.runFastTrialsNVertices("Benchmark", iterations.value(options), vertices.value(options), density.value(options), rng, options.has(debug), output);
+            } catch (IOException ioe) {
+                System.out.println("File opening error: " + ioe);
+            }
+        } else if (options.has(ascending)){
+            try {
+                RunLabeler.runAscendingVertices(warmUp.value(options), iterations.value(options), vertices.value(options), rng, options.has(debug), output);
             } catch (IOException ioe) {
                 System.out.println("File opening error: " + ioe);
             }
@@ -173,7 +180,7 @@ public class RunLabeler {
             }
 
             start = System.currentTimeMillis();
-            int[][] result = Labeler.fastLabelGraph(testData);
+            int[][] result = Labeler.labelGraph(testData);
             end = System.currentTimeMillis();
             totalTime += end - start;
             int labels = Labeler.countLabels(result);
@@ -183,18 +190,113 @@ public class RunLabeler {
                 Labeler.printLabels(result);
             }
 
-            /*
             if (debug) {
                 start = System.currentTimeMillis();
-                List<Set<Integer>> check = Labeler.checkLabeling(result);
-                GraphGenerator.printGraph(check);
+                int[][] check = Labeler.checkLabeling(result);
                 end = System.currentTimeMillis();
-                System.out.printf("Check %d: %b %d ms\n", i + 1, (check.equals(testData)) ? "PASSED" : "FAILED", end - start);
+                GraphGenerator.printGraph(check);
+
+                System.out.printf("Check %d: %b %d ms\n", i + 1, GraphGenerator.graphEquals(testData, check) ? "PASSED" : "FAILED", end - start);
             }
-            */
         }
         System.out.printf("Total %s Time: %d ms\n", trialName, totalTime);
         System.out.printf("Average %s Time per Graph: %d ms\n", trialName, totalTime/iterations);
         System.out.println("=== Ending " + trialName + " Phase ===");
+    }
+
+    private static void runAscendingVertices(int warmups, int iterations, int vertices, Random rng, boolean debug, PrintStream output) throws IOException {
+        System.out.printf("Starting Trial: %d to %d vertices\n", 1, vertices);
+        output.println("Edges -- Labels -- Time (milliseconds)");
+        long start, end, total, grandTotal;
+
+        grandTotal = 0;
+
+        for (int i = 1; i <= vertices; i++) {
+            System.out.printf("=== Starting Warm-up Phase for %d vertices ===\n", i);
+            output.printf("Trial: Warm-up with %d vertices\n", i);
+
+            total = 0;
+
+            for (int j = 0; j < warmups; j++) {
+                double density = rng.nextDouble();
+                start = System.currentTimeMillis();
+                int[][] testData = GraphGenerator.fastRandomGraph(i, density, rng);
+                end = System.currentTimeMillis();
+                int edges = GraphGenerator.countEdges(testData);
+                System.out.printf("Setup %d: %d ms\n", j+1, end - start);
+                System.out.printf("Vertices: %d; Density: %f; Edges: %d\n", i, density, edges);
+                if (debug) {
+                    GraphGenerator.printGraph(testData);
+                    GraphGenerator.printAdjacencyMatrix(testData);
+                }
+
+                start = System.currentTimeMillis();
+                int[][] result = Labeler.labelGraph(testData);
+                end = System.currentTimeMillis();
+                total += end - start;
+                int labels = Labeler.countLabels(result);
+                System.out.printf("Run %d: %d Labels; %d ms\n", j+1, labels, end - start);
+                output.printf("%d\t%d\t%d\n", edges, labels, end - start);
+                if (debug) {
+                    Labeler.printLabels(result);
+                }
+
+                if (debug) {
+                    start = System.currentTimeMillis();
+                    int[][] check = Labeler.checkLabeling(result);
+                    end = System.currentTimeMillis();
+                    GraphGenerator.printGraph(check);
+
+                    System.out.printf("Check %d: %b %d ms\n", j+1, GraphGenerator.graphEquals(testData, check) ? "PASSED" : "FAILED", end - start);
+                }
+            }
+            System.out.printf("Total Warm-up Time: %d ms\n", total);
+            System.out.printf("Average Warm-up Time per Graph: %d ms\n", total/warmups);
+            System.out.println("=== Ending Warm-up Phase ===");
+
+            total = 0;
+
+            for (int j = 0; j < iterations; j++) {
+                double density = rng.nextDouble();
+                start = System.currentTimeMillis();
+                int[][] testData = GraphGenerator.fastRandomGraph(i, density, rng);
+                end = System.currentTimeMillis();
+                int edges = GraphGenerator.countEdges(testData);
+                System.out.printf("Setup %d: %d ms\n", j+1, end - start);
+                System.out.printf("Vertices: %d; Density: %f; Edges: %d\n", i, density, edges);
+                if (debug) {
+                    GraphGenerator.printGraph(testData);
+                    GraphGenerator.printAdjacencyMatrix(testData);
+                }
+
+                start = System.currentTimeMillis();
+                int[][] result = Labeler.labelGraph(testData);
+                end = System.currentTimeMillis();
+                total += end - start;
+                int labels = Labeler.countLabels(result);
+                System.out.printf("Run %d: %d Labels; %d ms\n", j+1, labels, end - start);
+                output.printf("%d\t%d\t%d\n", edges, labels, end - start);
+                if (debug) {
+                    Labeler.printLabels(result);
+                }
+
+                if (debug) {
+                    start = System.currentTimeMillis();
+                    int[][] check = Labeler.checkLabeling(result);
+                    end = System.currentTimeMillis();
+                    GraphGenerator.printGraph(check);
+
+                    System.out.printf("Check %d: %b %d ms\n", j+1, GraphGenerator.graphEquals(testData, check) ? "PASSED" : "FAILED", end - start);
+                }
+            }
+            System.out.printf("Total Benchmark Time: %d ms\n", total);
+            System.out.printf("Average Benchmark Time per Graph: %d ms\n", total/iterations);
+            System.out.println("=== Ending Benchmark Phase ===");
+            grandTotal += total;
+        }
+
+        System.out.printf("Grand Total Benchmark Time: %d ms\n", grandTotal);
+        System.out.printf("Average Benchmark Time per Graph: %d ms\n", grandTotal/(iterations*vertices));
+        System.out.println("=== Ending Benchmark ===");
     }
 }

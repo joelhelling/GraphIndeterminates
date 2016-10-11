@@ -36,7 +36,7 @@ public class TestLabeler {
     public void givenAGraphThatContainsThreeCliqueThenUseThreeLabels() {
         int[][] graph = {{1,1,0,1,1},{1,1,0,0,1},{0,0,1,0,1},{1,0,0,1,1},{1,1,1,1,1}};
 
-        int[][] labels = Labeler.fastLabelGraph(graph);
+        int[][] labels = Labeler.labelGraph(graph);
 
         List<List<Integer>> l = new ArrayList<>(labels.length);
         for (int i = 0; i < labels.length; i++) {
@@ -64,7 +64,7 @@ public class TestLabeler {
                 {0, 1, 1, 1, 1, 0, 1, 1},
                 {0, 1, 1, 1, 1, 1, 1, 1},
         };
-        int[][] labels = Labeler.fastLabelGraph(graph);
+        int[][] labels = Labeler.labelGraph(graph);
 
         List<List<Integer>> l = new ArrayList<>(labels.length);
         for (int i = 0; i < labels.length; i++) {
