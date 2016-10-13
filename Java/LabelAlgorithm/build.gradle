@@ -22,4 +22,5 @@ jar {
                 'Implementation-Version': version,
                 'Main-Class': 'edu.csuci.runner.RunLabeler'
     }
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it)}}
 }

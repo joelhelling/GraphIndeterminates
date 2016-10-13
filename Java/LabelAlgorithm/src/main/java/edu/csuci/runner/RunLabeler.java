@@ -256,6 +256,7 @@ public class RunLabeler {
 
             total = 0;
 
+            output.printf("Trial: Benchmark with %d vertices\n", i);
             for (int j = 0; j < iterations; j++) {
                 double density = rng.nextDouble();
                 start = System.currentTimeMillis();
