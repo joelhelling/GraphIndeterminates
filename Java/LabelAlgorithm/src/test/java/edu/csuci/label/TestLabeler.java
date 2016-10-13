@@ -88,6 +88,47 @@ public class TestLabeler {
         }
 
         Assert.assertEquals(rl, l);
+    }
 
+    @Test
+    public void GraphThatShouldProduceAFourClique() {
+        int[][] graph = {
+                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                {0, 1, 0, 0, 1, 0, 1, 1, 0, 1},
+                {0, 0, 1, 0, 0, 0, 0, 1, 1, 1},
+                {0, 0, 0, 1, 1, 0, 1, 1, 0, 1},
+                {0, 1, 0, 1, 1, 0, 0, 0, 1, 1},
+                {0, 0, 0, 0, 0, 1, 0, 0, 0, 1},
+                {0, 1, 0, 1, 0, 0, 1, 0, 1, 1},
+                {0, 1, 1, 1, 0, 0, 0, 1, 1, 1},
+                {0, 0, 1, 0, 1, 0, 1, 1, 1, 1},
+                {0, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+        };
+        int[][] labels = Labeler.labelGraph(graph);
+
+        List<List<Integer>> l = new ArrayList<>(labels.length);
+        for (int i = 0; i < labels.length; i++) {
+            l.add(Arrays.stream(labels[i]).boxed().collect(Collectors.toList()));
+        }
+
+        int[][] resultLabels = {
+                {1, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                {2, 3, 4, 0, 0, 0, 0, 0, 0, 0},
+                {5, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                {6, 7, 8, 0, 0, 0, 0, 0, 0, 0},
+                {2, 6, 9, 0, 0, 0, 0, 0, 0, 0},
+                {10, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                {3, 7, 11, 0, 0, 0, 0, 0, 0, 0},
+                {4, 5, 8, 0, 0, 0, 0, 0, 0, 0},
+                {5, 9, 11, 0, 0, 0, 0, 0, 0, 0},
+                {2, 3, 4, 5, 6, 7, 8, 9, 10, 11},
+
+        };
+        List<List<Integer>> rl = new ArrayList<>(resultLabels.length);
+        for (int i = 0; i < resultLabels.length; i++) {
+            rl.add(Arrays.stream(resultLabels[i]).boxed().collect(Collectors.toList()));
+        }
+
+        Assert.assertEquals(rl, l);
     }
 }

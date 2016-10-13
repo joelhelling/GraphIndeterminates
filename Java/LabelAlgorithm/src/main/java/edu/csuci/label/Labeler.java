@@ -249,7 +249,7 @@ public class Labeler {
 
         for (int i = 0; i < labels.length; i++) {
             res.append(i).append(": [");
-            for (int j = 0; j < labels.length && labels[i][j] != 0; j++) {
+            for (int j = 0; j < labels[i].length && labels[i][j] != 0; j++) {
                 res.append(labels[i][j]).append(", ");
             }
             res.delete(res.length() - 2, res.length());
