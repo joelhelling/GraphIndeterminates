@@ -175,8 +175,8 @@ public class RunLabeler {
             System.out.printf("Setup %d: %d ms\n", i+1, end - start);
             System.out.printf("Vertices: %d; Density: %f; Edges: %d\n", vertices, density, edges);
             if (debug) {
-                GraphGenerator.printGraph(testData);
                 GraphGenerator.printAdjacencyMatrix(testData);
+                GraphGenerator.printGraph(testData);
             }
 
             start = System.currentTimeMillis();

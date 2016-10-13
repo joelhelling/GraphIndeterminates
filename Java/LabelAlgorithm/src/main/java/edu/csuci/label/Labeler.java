@@ -1,9 +1,6 @@
 package edu.csuci.label;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -88,7 +85,7 @@ public class Labeler {
     }
 
     public static int[][] labelGraph(int[][] graph) {
-        int[][] labels = new int[graph.length][graph.length*graph.length/4 + 1];
+        int[][] labels = new int[graph.length][graph.length];
         for (int i = 0; i < labels.length; i++) {
             for (int j = 0; j < labels[i].length; j++) {
                 labels[i][j] = 0;
@@ -121,6 +118,7 @@ public class Labeler {
         int qi;
 
         int cci, ccj;
+        int copyIndex;
 
         for (v = 0; v < graph.length; v++) {
             if (graph[v][v] == 0) {
@@ -133,7 +131,13 @@ public class Labeler {
                     }
                     if (connections[v][w] == 0) {
                         currentClique[ccIndex++] = w;
+                        if (indexes[v] >= labels[v].length) {
+                            labels[v] = Arrays.copyOf(labels[v], labels[v].length * 2);
+                        }
                         labels[v][indexes[v]++] = lambda;
+                        if (indexes[w] >= labels[w].length) {
+                            labels[w] = Arrays.copyOf(labels[w], labels[w].length * 2);
+                        }
                         labels[w][indexes[w]++] = lambda;
 
                         for (q = w+1; q < graph.length; q++) {
@@ -149,6 +153,9 @@ public class Labeler {
                             }
                             if (isSubset) {
                                 currentClique[ccIndex++] = q;
+                                if (indexes[q] >= labels[q].length) {
+                                    labels[q] = Arrays.copyOf(labels[q], labels[q].length * 2);
+                                }
                                 labels[q][indexes[q]++] = lambda;
                             }
                         }

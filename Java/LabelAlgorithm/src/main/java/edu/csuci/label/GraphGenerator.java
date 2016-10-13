@@ -43,11 +43,12 @@ public class GraphGenerator {
     public static int[][] fastRandomGraph(int n, double density, Random rng) {
         int[][] graph = new int[n][n];
 
-        for (int i = 1; i < graph.length; i++) {
+        for (int i = 0; i < graph.length; i++) {
            for (int j = i+1; j < graph[i].length; j++) {
                if (i != j) {
                    if (rng.nextDouble() <= density) {
                        graph[i][i] = 1;
+                       graph[j][j] = 1;
                        graph[i][j] = 1;
                        graph[j][i] = 1;
                    }
