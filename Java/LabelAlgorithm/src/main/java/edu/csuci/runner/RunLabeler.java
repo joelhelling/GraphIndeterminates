@@ -1,5 +1,6 @@
 package edu.csuci.runner;
 
+import edu.csuci.fileparser.AsciiArcsIO;
 import edu.csuci.label.GraphGenerator;
 import edu.csuci.label.Labeler;
 import joptsimple.OptionParser;
@@ -35,14 +36,15 @@ public class RunLabeler {
                 .withRequiredArg().ofType(Integer.class).required();
         OptionSpec<Double> density = parser.acceptsAll(Arrays.asList("d","density"), "Between 0.0 and 1.0. Probability of having an edge between two vertices")
                 .withRequiredArg().ofType(Double.class).defaultsTo(0.5);
-        OptionSpec<String> file = parser.acceptsAll(Arrays.asList("o", "output"), "The file to output data to").withRequiredArg().ofType(String.class);
+        OptionSpec<String> outFile = parser.acceptsAll(Arrays.asList("o", "output"), "The file to output data to").withRequiredArg().ofType(String.class);
+        OptionSpec<String> inFile = parser.acceptsAll(Arrays.asList("input"), "The file to read graph from with current supported formats").withRequiredArg().ofType(String.class);
 
         OptionSet options = parser.parse(args);
 
         PrintStream output;
-        if (options.has(file)) {
+        if (options.has(outFile)) {
             try {
-                output = new PrintStream(file.value(options));
+                output = new PrintStream(outFile.value(options));
             } catch (FileNotFoundException fnfe) {
                 System.out.println(fnfe);
                 System.out.println("Using System.out instead...");
@@ -57,6 +59,12 @@ public class RunLabeler {
                 parser.printHelpOn(System.out);
             } catch (IOException ioe) {
                 System.out.println(ioe);
+            }
+        } else if (options.has(inFile)) {
+            try {
+                runSingleGraph(AsciiArcsIO.readGraph(inFile.value(options)), options.has(debug));
+            } catch (FileNotFoundException fnfe) {
+                System.out.println("Unable to read from file: " + fnfe);
             }
         } else if (options.has(nvertices)) {
             try {
@@ -299,5 +307,32 @@ public class RunLabeler {
         System.out.printf("Grand Total Benchmark Time: %d ms\n", grandTotal);
         System.out.printf("Average Benchmark Time per Graph: %d ms\n", grandTotal/(iterations*vertices));
         System.out.println("=== Ending Benchmark ===");
+    }
+
+    private static void runSingleGraph(int[][] graph, boolean debug) {
+        long start, end;
+
+        System.out.printf("Labeling graph with %d vertices and %d edges\n", graph.length, GraphGenerator.countEdges(graph));
+
+        if (debug) {
+            GraphGenerator.printGraph(graph);
+            GraphGenerator.printAdjacencyMatrix(graph);
+        }
+
+        start = System.currentTimeMillis();
+        int[][] labels = Labeler.labelGraph(graph);
+        end = System.currentTimeMillis();
+        int numLabels = Labeler.countLabels(labels);
+        System.out.printf("Labeling completed with %d labels in %d ms\n", numLabels, end - start);
+
+        if (debug) {
+            Labeler.printLabels(labels);
+            start = System.currentTimeMillis();
+            int[][] check = Labeler.checkLabeling(labels);
+            end = System.currentTimeMillis();
+            GraphGenerator.printGraph(check);
+
+            System.out.printf("Check %b in %d ms", GraphGenerator.graphEquals(graph, check), end - start);
+        }
     }
 }
