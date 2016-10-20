@@ -1,5 +1,6 @@
 package edu.csuci.label;
 
+import edu.csuci.graph.MatrixGraphGenerator;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -21,7 +22,7 @@ public class TestGraphGenerator {
 
         Random rng = new Random(10);
 
-        Assert.assertEquals(GraphGenerator.randomGraph(4, 0.00, rng), result);
+        Assert.assertEquals(MatrixGraphGenerator.randomGraph(4, 0.00, rng), result);
     }
 
     @Test
@@ -34,6 +35,6 @@ public class TestGraphGenerator {
 
         Random rng = new Random(10);
 
-        Assert.assertEquals(GraphGenerator.randomGraph(4, 1.00, rng), result);
+        Assert.assertEquals(MatrixGraphGenerator.randomGraph(4, 1.00, rng), result);
     }
 }

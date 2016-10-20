@@ -1,7 +1,8 @@
 package edu.csuci.runner;
 
 import edu.csuci.fileparser.AsciiArcsIO;
-import edu.csuci.label.GraphGenerator;
+import edu.csuci.graph.ListGraphGenerator;
+import edu.csuci.graph.MatrixGraphGenerator;
 import edu.csuci.label.Labeler;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
@@ -104,11 +105,11 @@ public class RunLabeler {
             int vertices = rng.nextInt(upperBound - lowerBound + 1) + lowerBound;
 
             start = System.currentTimeMillis();
-            List<Set<Integer>> testData = GraphGenerator.randomGraph(vertices, density, rng);
+            List<Set<Integer>> testData = ListGraphGenerator.randomGraph(vertices, density, rng);
             end = System.currentTimeMillis();
             System.out.printf("Setup %d: %d ms\n", i+1, end - start);
-            System.out.printf("Vertices: %d; Density: %f; Edges: %d\n", vertices, density, GraphGenerator.countEdges(testData));
-            GraphGenerator.printGraph(testData);
+            System.out.printf("Vertices: %d; Density: %f; Edges: %d\n", vertices, density, ListGraphGenerator.countEdges(testData));
+            ListGraphGenerator.printGraph(testData);
 
             start = System.currentTimeMillis();
             List<Set<Integer>> result = Labeler.labelGraph(testData);
@@ -119,7 +120,7 @@ public class RunLabeler {
 
             start = System.currentTimeMillis();
             List<Set<Integer>> check = Labeler.checkLabeling(result);
-            GraphGenerator.printGraph(check);
+            ListGraphGenerator.printGraph(check);
             end = System.currentTimeMillis();
             System.out.printf("Check %d: %b %d ms\n", i+1, (check.equals(testData))?"PASSED":"FAILED", end - start);
         }
@@ -136,13 +137,13 @@ public class RunLabeler {
         totalTime = 0;
         for (int i = 0; i < iterations; i++) {
             start = System.currentTimeMillis();
-            List<Set<Integer>> testData = GraphGenerator.randomGraph(vertices, density, rng);
+            List<Set<Integer>> testData = ListGraphGenerator.randomGraph(vertices, density, rng);
             end = System.currentTimeMillis();
-            int edges = GraphGenerator.countEdges(testData);
+            int edges = ListGraphGenerator.countEdges(testData);
             System.out.printf("Setup %d: %d ms\n", i+1, end - start);
             System.out.printf("Vertices: %d; Density: %f; Edges: %d\n", vertices, density, edges);
             if (debug) {
-                GraphGenerator.printGraph(testData);
+                ListGraphGenerator.printGraph(testData);
             }
 
             start = System.currentTimeMillis();
@@ -159,7 +160,7 @@ public class RunLabeler {
             if (debug) {
                 start = System.currentTimeMillis();
                 List<Set<Integer>> check = Labeler.checkLabeling(result);
-                GraphGenerator.printGraph(check);
+                ListGraphGenerator.printGraph(check);
                 end = System.currentTimeMillis();
                 System.out.printf("Check %d: %b %d ms\n", i + 1, (check.equals(testData)) ? "PASSED" : "FAILED", end - start);
             }
@@ -177,14 +178,13 @@ public class RunLabeler {
         totalTime = 0;
         for (int i = 0; i < iterations; i++) {
             start = System.currentTimeMillis();
-            int[][] testData = GraphGenerator.fastRandomGraph(vertices, density, rng);
+            int[][] testData = MatrixGraphGenerator.randomGraph(vertices, density, rng);
             end = System.currentTimeMillis();
-            int edges = GraphGenerator.countEdges(testData);
+            int edges = MatrixGraphGenerator.countEdges(testData);
             System.out.printf("Setup %d: %d ms\n", i+1, end - start);
             System.out.printf("Vertices: %d; Density: %f; Edges: %d\n", vertices, density, edges);
             if (debug) {
-                GraphGenerator.printAdjacencyMatrix(testData);
-                GraphGenerator.printGraph(testData);
+                MatrixGraphGenerator.printGraph(testData);
             }
 
             start = System.currentTimeMillis();
@@ -202,9 +202,9 @@ public class RunLabeler {
                 start = System.currentTimeMillis();
                 int[][] check = Labeler.checkLabeling(result);
                 end = System.currentTimeMillis();
-                GraphGenerator.printGraph(check);
+                MatrixGraphGenerator.printGraph(check);
 
-                System.out.printf("Check %d: %b %d ms\n", i + 1, GraphGenerator.graphEquals(testData, check) ? "PASSED" : "FAILED", end - start);
+                System.out.printf("Check %d: %b %d ms\n", i + 1, MatrixGraphGenerator.graphEquals(testData, check) ? "PASSED" : "FAILED", end - start);
             }
         }
         System.out.printf("Total %s Time: %d ms\n", trialName, totalTime);
@@ -228,14 +228,13 @@ public class RunLabeler {
             for (int j = 0; j < warmups; j++) {
                 double density = rng.nextDouble();
                 start = System.currentTimeMillis();
-                int[][] testData = GraphGenerator.fastRandomGraph(i, density, rng);
+                int[][] testData = MatrixGraphGenerator.randomGraph(i, density, rng);
                 end = System.currentTimeMillis();
-                int edges = GraphGenerator.countEdges(testData);
+                int edges = MatrixGraphGenerator.countEdges(testData);
                 System.out.printf("Setup %d: %d ms\n", j+1, end - start);
                 System.out.printf("Vertices: %d; Density: %f; Edges: %d\n", i, density, edges);
                 if (debug) {
-                    GraphGenerator.printGraph(testData);
-                    GraphGenerator.printAdjacencyMatrix(testData);
+                    MatrixGraphGenerator.printGraph(testData);
                 }
 
                 start = System.currentTimeMillis();
@@ -253,9 +252,9 @@ public class RunLabeler {
                     start = System.currentTimeMillis();
                     int[][] check = Labeler.checkLabeling(result);
                     end = System.currentTimeMillis();
-                    GraphGenerator.printGraph(check);
+                    MatrixGraphGenerator.printGraph(check);
 
-                    System.out.printf("Check %d: %b %d ms\n", j+1, GraphGenerator.graphEquals(testData, check) ? "PASSED" : "FAILED", end - start);
+                    System.out.printf("Check %d: %b %d ms\n", j+1, MatrixGraphGenerator.graphEquals(testData, check) ? "PASSED" : "FAILED", end - start);
                 }
             }
             System.out.printf("Total Warm-up Time: %d ms\n", total);
@@ -268,14 +267,13 @@ public class RunLabeler {
             for (int j = 0; j < iterations; j++) {
                 double density = rng.nextDouble();
                 start = System.currentTimeMillis();
-                int[][] testData = GraphGenerator.fastRandomGraph(i, density, rng);
+                int[][] testData = MatrixGraphGenerator.randomGraph(i, density, rng);
                 end = System.currentTimeMillis();
-                int edges = GraphGenerator.countEdges(testData);
+                int edges = MatrixGraphGenerator.countEdges(testData);
                 System.out.printf("Setup %d: %d ms\n", j+1, end - start);
                 System.out.printf("Vertices: %d; Density: %f; Edges: %d\n", i, density, edges);
                 if (debug) {
-                    GraphGenerator.printGraph(testData);
-                    GraphGenerator.printAdjacencyMatrix(testData);
+                    MatrixGraphGenerator.printGraph(testData);
                 }
 
                 start = System.currentTimeMillis();
@@ -293,9 +291,9 @@ public class RunLabeler {
                     start = System.currentTimeMillis();
                     int[][] check = Labeler.checkLabeling(result);
                     end = System.currentTimeMillis();
-                    GraphGenerator.printGraph(check);
+                    MatrixGraphGenerator.printGraph(check);
 
-                    System.out.printf("Check %d: %b %d ms\n", j+1, GraphGenerator.graphEquals(testData, check) ? "PASSED" : "FAILED", end - start);
+                    System.out.printf("Check %d: %b %d ms\n", j+1, MatrixGraphGenerator.graphEquals(testData, check) ? "PASSED" : "FAILED", end - start);
                 }
             }
             System.out.printf("Total Benchmark Time: %d ms\n", total);
@@ -312,11 +310,10 @@ public class RunLabeler {
     private static void runSingleGraph(int[][] graph, boolean debug) {
         long start, end;
 
-        System.out.printf("Labeling graph with %d vertices and %d edges\n", graph.length, GraphGenerator.countEdges(graph));
+        System.out.printf("Labeling graph with %d vertices and %d edges\n", graph.length, MatrixGraphGenerator.countEdges(graph));
 
         if (debug) {
-            GraphGenerator.printGraph(graph);
-            GraphGenerator.printAdjacencyMatrix(graph);
+            MatrixGraphGenerator.printGraph(graph);
         }
 
         start = System.currentTimeMillis();
@@ -330,9 +327,9 @@ public class RunLabeler {
             start = System.currentTimeMillis();
             int[][] check = Labeler.checkLabeling(labels);
             end = System.currentTimeMillis();
-            GraphGenerator.printGraph(check);
+            MatrixGraphGenerator.printGraph(check);
 
-            System.out.printf("Check %b in %d ms", GraphGenerator.graphEquals(graph, check), end - start);
+            System.out.printf("Check %b in %d ms", MatrixGraphGenerator.graphEquals(graph, check), end - start);
         }
     }
 }
