@@ -29,16 +29,18 @@ public class RunLabeler {
         OptionSpec<Void> debug = parser.accepts("debug", "If specified, runs checking algorithm and prints out results");
 
         OptionSpec<Void> help = parser.acceptsAll(Arrays.asList("help","h"), "Help").forHelp();
-        OptionSpec<Integer> warmUp = parser.acceptsAll(Arrays.asList("w","warmup"), "The number of warm-up runs of the algorithm")
-                .withRequiredArg().ofType(Integer.class).required();
-        OptionSpec<Integer> iterations = parser.acceptsAll(Arrays.asList("i","iterations"), "The number of benchmark runs of the algorithm")
-                .withRequiredArg().ofType(Integer.class).required();
-        OptionSpec<Integer> vertices = parser.acceptsAll(Arrays.asList("v","vertices"), "The number of vertices in the generated graphs")
-                .withRequiredArg().ofType(Integer.class).required();
-        OptionSpec<Double> density = parser.acceptsAll(Arrays.asList("d","density"), "Between 0.0 and 1.0. Probability of having an edge between two vertices")
+        OptionSpec<Integer> warmUp = parser.accepts("warmup", "The number of warm-up runs of the algorithm")
+                .withRequiredArg().ofType(Integer.class).defaultsTo(20);
+        OptionSpec<Integer> iterations = parser.accepts("iterations", "The number of benchmark runs of the algorithm")
+                .withRequiredArg().ofType(Integer.class).defaultsTo(100);
+        OptionSpec<Integer> vertices = parser.accepts("vertices", "The number of vertices in the generated graphs")
+                .withRequiredArg().ofType(Integer.class).defaultsTo(100);
+        OptionSpec<Double> density = parser.accepts("density", "Between 0.0 and 1.0. Probability of having an edge between two vertices")
                 .withRequiredArg().ofType(Double.class).defaultsTo(0.5);
-        OptionSpec<String> outFile = parser.acceptsAll(Arrays.asList("o", "output"), "The file to output data to").withRequiredArg().ofType(String.class);
-        OptionSpec<String> inFile = parser.acceptsAll(Arrays.asList("input"), "The file to read graph from with current supported formats").withRequiredArg().ofType(String.class);
+        OptionSpec<String> outFile = parser.accepts("output", "The file to output data to")
+                .withRequiredArg().ofType(String.class);
+        OptionSpec<String> inFile = parser.accepts("input", "The file to read graph from with current supported formats")
+                .withRequiredArg().ofType(String.class);
 
         OptionSet options = parser.parse(args);
 
