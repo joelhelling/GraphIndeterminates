@@ -1,6 +1,5 @@
-package edu.csuci.label;
+package edu.csuci.graph;
 
-import edu.csuci.graph.MatrixGraphGenerator;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -11,7 +10,7 @@ import java.util.stream.Stream;
 /**
  * Created by Joel on 9/28/2016.
  */
-public class TestGraphGenerator {
+public class TestListGraphGenerator {
     @Test
     public void zeroDensityGraphShouldReturnEmptyMap() {
         List<Set<Integer>> result = new ArrayList<>(4);
@@ -22,7 +21,7 @@ public class TestGraphGenerator {
 
         Random rng = new Random(10);
 
-        Assert.assertEquals(MatrixGraphGenerator.randomGraph(4, 0.00, rng), result);
+        Assert.assertEquals(ListGraphGenerator.randomGraph(4, 0.00, rng), result);
     }
 
     @Test
@@ -35,6 +34,6 @@ public class TestGraphGenerator {
 
         Random rng = new Random(10);
 
-        Assert.assertEquals(MatrixGraphGenerator.randomGraph(4, 1.00, rng), result);
+        Assert.assertEquals(ListGraphGenerator.randomGraph(4, 1.00, rng), result);
     }
 }
