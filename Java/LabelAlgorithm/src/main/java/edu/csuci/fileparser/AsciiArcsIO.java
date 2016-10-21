@@ -5,7 +5,10 @@ import java.io.FileNotFoundException;
 import java.util.Scanner;
 
 /**
- * Created by jhelling on 10/17/16.
+ * LabelAlgorithm
+ * California State University Channel Islands
+ * Constructing an Indeterminate String from its Associated Graph
+ * Created by Joel on 10/17/16.
  */
 public class AsciiArcsIO {
     public static int[][] readGraph(String fileName) throws FileNotFoundException {

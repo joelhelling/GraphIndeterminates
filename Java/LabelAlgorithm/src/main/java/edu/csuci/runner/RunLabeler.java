@@ -17,7 +17,10 @@ import java.util.Random;
 import java.util.Set;
 
 /**
- * Created by jhelling on 9/29/16.
+ * LabelAlgorithm
+ * California State University Channel Islands
+ * Constructing an Indeterminate String from its Associated Graph
+ * Created by Joel on 9/29/16.
  */
 public class RunLabeler {
     public static void main(String[] args) {

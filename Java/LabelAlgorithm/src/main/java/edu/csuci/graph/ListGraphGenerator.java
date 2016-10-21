@@ -3,6 +3,9 @@ package edu.csuci.graph;
 import java.util.*;
 
 /**
+ * LabelAlgorithm
+ * California State University Channel Islands
+ * Constructing an Indeterminate String from its Associated Graph
  * Created by Joel on 10/20/2016.
  */
 public class ListGraphGenerator {

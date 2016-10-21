@@ -7,7 +7,10 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Created by jhelling on 9/28/16.
+ * LabelAlgorithm
+ * California State University Channel Islands
+ * Constructing an Indeterminate String from its Associated Graph
+ * Created by Joel on 9/28/16.
  */
 public class TestLabeler {
     @Test
