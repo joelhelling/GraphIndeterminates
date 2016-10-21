@@ -3,53 +3,33 @@ package edu.csuci.label;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
  * LabelAlgorithm
  * California State University Channel Islands
  * Constructing an Indeterminate String from its Associated Graph
- * Created by Joel on 9/28/16.
+ * Created by Joel on 10/20/2016.
  */
-public class TestLabeler {
-    @Test
-    public void givenAnEmptyLabelingShouldReturnEmpty() {
-        List<Set<Integer>> empty = Collections.emptyList();
-        Assert.assertEquals(Labeler.labelGraph(empty), Collections.emptyList());
-    }
-
-    @Test
-    public void givenAGraphWithNoEdgesShouldReturnOneLabelPerVertex() {
-        List<Set<Integer>> graphNoEdges = new ArrayList<>(10);
-        for (int i = 0; i < 10; i++) {
-            graphNoEdges.add(new HashSet<>());
-        }
-
-        List<Set<Integer>> result = new ArrayList<>();
-        for (int i = 0; i < 10; i++) {
-            result.add(new HashSet<>());
-            result.get(i).add(i);
-        }
-
-        Assert.assertEquals(Labeler.labelGraph(graphNoEdges), result);
-    }
-
+public class TestMatrixLabeler {
     @Test
     public void givenAGraphThatContainsThreeCliqueThenUseThreeLabels() {
         int[][] graph = {{1,1,0,1,1},{1,1,0,0,1},{0,0,1,0,1},{1,0,0,1,1},{1,1,1,1,1}};
 
-        int[][] labels = Labeler.labelGraph(graph);
+        int[][] labels = MatrixLabeler.labelGraph(graph);
 
         List<List<Integer>> l = new ArrayList<>(labels.length);
-        for (int i = 0; i < labels.length; i++) {
-            l.add(Arrays.stream(labels[i]).boxed().collect(Collectors.toList()));
+        for (int[] label : labels) {
+            l.add(Arrays.stream(label).boxed().collect(Collectors.toList()));
         }
 
         int[][] resultLabels = {{1,2,0,0,0},{1,0,0,0,0},{3,0,0,0,0},{2,0,0,0,0},{1,2,3,0,0}};
         List<List<Integer>> rl = new ArrayList<>(resultLabels.length);
-        for (int i = 0; i < resultLabels.length; i++) {
-            rl.add(Arrays.stream(resultLabels[i]).boxed().collect(Collectors.toList()));
+        for (int[] resultLabel : resultLabels) {
+            rl.add(Arrays.stream(resultLabel).boxed().collect(Collectors.toList()));
         }
 
         Assert.assertEquals(rl, l);
@@ -67,11 +47,11 @@ public class TestLabeler {
                 {0, 0, 1, 0, 1, 1, 1, 1},
                 {1, 1, 1, 1, 1, 1, 1, 1}
         };
-        int[][] labels = Labeler.labelGraph(graph);
+        int[][] labels = MatrixLabeler.labelGraph(graph);
 
         List<List<Integer>> l = new ArrayList<>(labels.length);
-        for (int i = 0; i < labels.length; i++) {
-            l.add(Arrays.stream(labels[i]).boxed().collect(Collectors.toList()));
+        for (int[] label : labels) {
+            l.add(Arrays.stream(label).boxed().collect(Collectors.toList()));
         }
 
         int[][] resultLabels = {
@@ -86,8 +66,8 @@ public class TestLabeler {
 
         };
         List<List<Integer>> rl = new ArrayList<>(resultLabels.length);
-        for (int i = 0; i < resultLabels.length; i++) {
-            rl.add(Arrays.stream(resultLabels[i]).boxed().collect(Collectors.toList()));
+        for (int[] resultLabel : resultLabels) {
+            rl.add(Arrays.stream(resultLabel).boxed().collect(Collectors.toList()));
         }
 
         Assert.assertEquals(rl, l);
@@ -107,11 +87,11 @@ public class TestLabeler {
                 {0, 0, 1, 0, 1, 0, 1, 1, 1, 1},
                 {0, 1, 1, 1, 1, 1, 1, 1, 1, 1},
         };
-        int[][] labels = Labeler.labelGraph(graph);
+        int[][] labels = MatrixLabeler.labelGraph(graph);
 
         List<List<Integer>> l = new ArrayList<>(labels.length);
-        for (int i = 0; i < labels.length; i++) {
-            l.add(Arrays.stream(labels[i]).boxed().collect(Collectors.toList()));
+        for (int[] label : labels) {
+            l.add(Arrays.stream(label).boxed().collect(Collectors.toList()));
         }
 
         int[][] resultLabels = {
@@ -128,8 +108,8 @@ public class TestLabeler {
 
         };
         List<List<Integer>> rl = new ArrayList<>(resultLabels.length);
-        for (int i = 0; i < resultLabels.length; i++) {
-            rl.add(Arrays.stream(resultLabels[i]).boxed().collect(Collectors.toList()));
+        for (int[] resultLabel : resultLabels) {
+            rl.add(Arrays.stream(resultLabel).boxed().collect(Collectors.toList()));
         }
 
         Assert.assertEquals(rl, l);

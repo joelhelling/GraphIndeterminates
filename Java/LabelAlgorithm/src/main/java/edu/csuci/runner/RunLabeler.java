@@ -3,7 +3,8 @@ package edu.csuci.runner;
 import edu.csuci.fileparser.AsciiArcsIO;
 import edu.csuci.graph.ListGraphGenerator;
 import edu.csuci.graph.MatrixGraphGenerator;
-import edu.csuci.label.Labeler;
+import edu.csuci.label.ListLabeler;
+import edu.csuci.label.MatrixLabeler;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
@@ -117,14 +118,14 @@ public class RunLabeler {
             ListGraphGenerator.printGraph(testData);
 
             start = System.currentTimeMillis();
-            List<Set<Integer>> result = Labeler.labelGraph(testData);
+            List<Set<Integer>> result = ListLabeler.labelGraph(testData);
             end = System.currentTimeMillis();
             totalTime += end - start;
-            System.out.printf("Run %d: %d Labels; %d ms\n", i+1, Labeler.countLabels(result), end - start);
-            Labeler.printLabels(result);
+            System.out.printf("Run %d: %d Labels; %d ms\n", i+1, ListLabeler.countLabels(result), end - start);
+            ListLabeler.printLabels(result);
 
             start = System.currentTimeMillis();
-            List<Set<Integer>> check = Labeler.checkLabeling(result);
+            List<Set<Integer>> check = ListLabeler.checkLabeling(result);
             ListGraphGenerator.printGraph(check);
             end = System.currentTimeMillis();
             System.out.printf("Check %d: %b %d ms\n", i+1, (check.equals(testData))?"PASSED":"FAILED", end - start);
@@ -152,19 +153,19 @@ public class RunLabeler {
             }
 
             start = System.currentTimeMillis();
-            List<Set<Integer>> result = Labeler.labelGraph(testData);
+            List<Set<Integer>> result = ListLabeler.labelGraph(testData);
             end = System.currentTimeMillis();
             totalTime += end - start;
-            int labels = Labeler.countLabels(result);
+            int labels = ListLabeler.countLabels(result);
             System.out.printf("Run %d: %d Labels; %d ms\n", i+1, labels, end - start);
             output.printf("%d\t%d\t%d\n", edges, labels, end - start);
             if (debug) {
-                Labeler.printLabels(result);
+                ListLabeler.printLabels(result);
             }
 
             if (debug) {
                 start = System.currentTimeMillis();
-                List<Set<Integer>> check = Labeler.checkLabeling(result);
+                List<Set<Integer>> check = ListLabeler.checkLabeling(result);
                 ListGraphGenerator.printGraph(check);
                 end = System.currentTimeMillis();
                 System.out.printf("Check %d: %b %d ms\n", i + 1, (check.equals(testData)) ? "PASSED" : "FAILED", end - start);
@@ -193,19 +194,19 @@ public class RunLabeler {
             }
 
             start = System.currentTimeMillis();
-            int[][] result = Labeler.labelGraph(testData);
+            int[][] result = MatrixLabeler.labelGraph(testData);
             end = System.currentTimeMillis();
             totalTime += end - start;
-            int labels = Labeler.countLabels(result);
+            int labels = MatrixLabeler.countLabels(result);
             System.out.printf("Run %d: %d Labels; %d ms\n", i+1, labels, end - start);
             output.printf("%d\t%d\t%d\n", edges, labels, end - start);
             if (debug) {
-                Labeler.printLabels(result);
+                MatrixLabeler.printLabels(result);
             }
 
             if (debug) {
                 start = System.currentTimeMillis();
-                int[][] check = Labeler.checkLabeling(result);
+                int[][] check = MatrixLabeler.checkLabeling(result);
                 end = System.currentTimeMillis();
                 MatrixGraphGenerator.printGraph(check);
 
@@ -243,19 +244,19 @@ public class RunLabeler {
                 }
 
                 start = System.currentTimeMillis();
-                int[][] result = Labeler.labelGraph(testData);
+                int[][] result = MatrixLabeler.labelGraph(testData);
                 end = System.currentTimeMillis();
                 total += end - start;
-                int labels = Labeler.countLabels(result);
+                int labels = MatrixLabeler.countLabels(result);
                 System.out.printf("Run %d: %d Labels; %d ms\n", j+1, labels, end - start);
                 output.printf("%d\t%d\t%d\n", edges, labels, end - start);
                 if (debug) {
-                    Labeler.printLabels(result);
+                    MatrixLabeler.printLabels(result);
                 }
 
                 if (debug) {
                     start = System.currentTimeMillis();
-                    int[][] check = Labeler.checkLabeling(result);
+                    int[][] check = MatrixLabeler.checkLabeling(result);
                     end = System.currentTimeMillis();
                     MatrixGraphGenerator.printGraph(check);
 
@@ -282,19 +283,19 @@ public class RunLabeler {
                 }
 
                 start = System.currentTimeMillis();
-                int[][] result = Labeler.labelGraph(testData);
+                int[][] result = MatrixLabeler.labelGraph(testData);
                 end = System.currentTimeMillis();
                 total += end - start;
-                int labels = Labeler.countLabels(result);
+                int labels = MatrixLabeler.countLabels(result);
                 System.out.printf("Run %d: %d Labels; %d ms\n", j+1, labels, end - start);
                 output.printf("%d\t%d\t%d\n", edges, labels, end - start);
                 if (debug) {
-                    Labeler.printLabels(result);
+                    MatrixLabeler.printLabels(result);
                 }
 
                 if (debug) {
                     start = System.currentTimeMillis();
-                    int[][] check = Labeler.checkLabeling(result);
+                    int[][] check = MatrixLabeler.checkLabeling(result);
                     end = System.currentTimeMillis();
                     MatrixGraphGenerator.printGraph(check);
 
@@ -322,15 +323,15 @@ public class RunLabeler {
         }
 
         start = System.currentTimeMillis();
-        int[][] labels = Labeler.labelGraph(graph);
+        int[][] labels = MatrixLabeler.labelGraph(graph);
         end = System.currentTimeMillis();
-        int numLabels = Labeler.countLabels(labels);
+        int numLabels = MatrixLabeler.countLabels(labels);
         System.out.printf("Labeling completed with %d labels in %d ms\n", numLabels, end - start);
 
         if (debug) {
-            Labeler.printLabels(labels);
+            MatrixLabeler.printLabels(labels);
             start = System.currentTimeMillis();
-            int[][] check = Labeler.checkLabeling(labels);
+            int[][] check = MatrixLabeler.checkLabeling(labels);
             end = System.currentTimeMillis();
             MatrixGraphGenerator.printGraph(check);
 
