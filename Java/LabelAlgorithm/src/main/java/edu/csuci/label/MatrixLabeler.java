@@ -13,39 +13,22 @@ import java.util.Set;
 public class MatrixLabeler {
     public static int[][] labelGraph(int[][] graph) {
         int[][] labels = new int[graph.length][graph.length];
-        for (int i = 0; i < labels.length; i++) {
-            for (int j = 0; j < labels[i].length; j++) {
-                labels[i][j] = 0;
-            }
-        }
         int[][] connections = new int[graph.length][graph.length];
-        for (int i = 0; i < connections.length; i++) {
-            for (int j = 0; j < connections[i].length; j++) {
-                connections[i][j] = 0;
-            }
-        }
 
         int[] indexes = new int[graph.length];
-        for (int i = 0; i < indexes.length; i++) {
-            indexes[i] = 0;
-        }
+
         int[] currentClique = new int[graph.length];
-        for (int i = 0; i < currentClique.length; i++) {
-            currentClique[i] = 0;
-        }
+
         int ccIndex = 0;
 
         int lambda = 1;
 
-        int v;
-        int w;
-        int q;
+        int v, w, q;
 
         boolean isSubset;
         int qi;
 
         int cci, ccj;
-        int copyIndex;
 
         for (v = 0; v < graph.length; v++) {
             if (graph[v][v] == 0) {
