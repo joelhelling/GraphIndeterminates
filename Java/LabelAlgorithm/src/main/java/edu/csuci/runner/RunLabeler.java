@@ -2,9 +2,14 @@ package edu.csuci.runner;
 
 import edu.csuci.fileparser.AsciiArcsIO;
 import edu.csuci.graph.ListGraphGenerator;
+import edu.csuci.graph.MapGraphGenerator;
 import edu.csuci.graph.MatrixGraphGenerator;
 import edu.csuci.label.ListLabeler;
 import edu.csuci.label.MatrixLabeler;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import it.unipi.di.export.CoverUtils;
+import it.unipi.di.export.ECCc;
+import it.unipi.di.interfaces.ListGraph;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
@@ -12,10 +17,7 @@ import joptsimple.OptionSpec;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
 /**
  * LabelAlgorithm
@@ -30,6 +32,7 @@ public class RunLabeler {
         OptionSpec<Void> nvertices = parser.accepts("nvertices", "Runs the labeling algorithm on random graphs with specified vertices");
         OptionSpec<Void> fastVertices = parser.accepts("fnvertices", "Runs the optimized labeling algorithm on random graphs with specified vertices");
         OptionSpec<Void> ascending = parser.accepts("ascending", "Runs the optimized labeling algorithm on random graphs ");
+        OptionSpec<Void> cgm = parser.accepts("cgm", "Run the edge clique covering algorithm found in Clique Covering of Large Real-World Networks");
         OptionSpec<Void> debug = parser.accepts("debug", "If specified, runs checking algorithm and prints out results");
 
         OptionSpec<Void> help = parser.acceptsAll(Arrays.asList("help","h"), "Help").forHelp();
@@ -87,9 +90,16 @@ public class RunLabeler {
             } catch (IOException ioe) {
                 System.out.println("File opening error: " + ioe);
             }
-        } else if (options.has(ascending)){
+        } else if (options.has(ascending)) {
             try {
                 RunLabeler.runAscendingVertices(warmUp.value(options), iterations.value(options), vertices.value(options), rng, options.has(debug), output);
+            } catch (IOException ioe) {
+                System.out.println("File opening error: " + ioe);
+            }
+        } else if (options.has(cgm)) {
+            try {
+                RunLabeler.runCGMVertices("Warm-up", warmUp.value(options), vertices.value(options), density.value(options), rng, options.has(debug), output);
+                RunLabeler.runCGMVertices("Benchmark", iterations.value(options), vertices.value(options), density.value(options), rng, options.has(debug), output);
             } catch (IOException ioe) {
                 System.out.println("File opening error: " + ioe);
             }
@@ -179,7 +189,7 @@ public class RunLabeler {
     private static void runFastTrialsNVertices(String trialName, int iterations, int vertices, double density, Random rng, boolean debug, PrintStream output)  throws IOException {
         long totalTime, start, end;
         System.out.println("=== Starting " + trialName + " Phase ===");
-        output.printf("Trial: %s with %d vertices\n", trialName, vertices);
+        output.printf("Trial HRSS: %s with %d vertices\n", trialName, vertices);
         output.println("Edges -- Labels -- Time (milliseconds)");
         totalTime = 0;
         for (int i = 0; i < iterations; i++) {
@@ -219,7 +229,7 @@ public class RunLabeler {
     }
 
     private static void runAscendingVertices(int warmups, int iterations, int vertices, Random rng, boolean debug, PrintStream output) throws IOException {
-        System.out.printf("Starting Trial: %d to %d vertices\n", 1, vertices);
+        System.out.printf("Starting Trial HRSS: %d to %d vertices\n", 1, vertices);
         output.println("Edges -- Labels -- Time (milliseconds)");
         long start, end, total, grandTotal;
 
@@ -311,6 +321,57 @@ public class RunLabeler {
         System.out.printf("Grand Total Benchmark Time: %d ms\n", grandTotal);
         System.out.printf("Average Benchmark Time per Graph: %d ms\n", grandTotal/(iterations*vertices));
         System.out.println("=== Ending Benchmark ===");
+    }
+
+    private static void runCGMVertices(String trialName, int iterations, int vertices, double density, Random rng, boolean debug, PrintStream output)  throws IOException {
+        long totalTime, start, end;
+        System.out.println("=== Starting " + trialName + " Phase ===");
+        output.printf("Trial CGM: %s with %d vertices\n", trialName, vertices);
+        output.println("Edges -- Labels -- Time (milliseconds)");
+        totalTime = 0;
+        for (int i = 0; i < iterations; i++) {
+            start = System.currentTimeMillis();
+            Map<Integer, List<Integer>> testData = MapGraphGenerator.randomGraph(vertices, density, rng);
+            ListGraph lg = new ListGraph(testData);
+            ECCc coverer = new ECCc(lg);
+            end = System.currentTimeMillis();
+            int edges = MapGraphGenerator.countEdges(testData);
+            System.out.printf("Setup %d: %d ms\n", i+1, end - start);
+            System.out.printf("Vertices: %d; Density: %f; Edges: %d\n", vertices, density, edges);
+            if (debug) {
+                MapGraphGenerator.printGraph(testData);
+            }
+
+            start = System.currentTimeMillis();
+            coverer.start(debug);
+            end = System.currentTimeMillis();
+            totalTime += end - start;
+            List<IntOpenHashSet> result = coverer.solution();
+            int cliques = result.size();
+            System.out.printf("Initial %d: %d Cliques; %d ms\n", i+1, cliques, end - start);
+            output.printf("Initial: %d\t%d\t%d\n", edges, cliques, end - start);
+            if (debug) {
+                result.forEach(x -> System.out.println(Arrays.toString(x.toIntArray())));
+            }
+
+            start = System.currentTimeMillis();
+            int removed = CoverUtils.minimalize(result);
+            end = System.currentTimeMillis();
+
+            System.out.printf("Final %d: %d Cliques; %d ms\n", i+1, cliques - removed, end - start);
+            output.printf("Final: %d\t%d\t%d\n", edges, cliques - removed, end - start);
+
+            if (debug) {
+                start = System.currentTimeMillis();
+                boolean check = coverer.checkSolution();
+                end = System.currentTimeMillis();
+
+                System.out.printf("Check %d: %b %d ms\n", i + 1, check, end - start);
+            }
+        }
+        System.out.printf("Total %s Time: %d ms\n", trialName, totalTime);
+        System.out.printf("Average %s Time per Graph: %d ms\n", trialName, totalTime/iterations);
+        System.out.println("=== Ending " + trialName + " Phase ===");
     }
 
     private static void runSingleGraph(int[][] graph, boolean debug) {

@@ -14,13 +14,11 @@ public class MatrixGraphGenerator {
 
         for (int i = 0; i < graph.length; i++) {
            for (int j = i+1; j < graph[i].length; j++) {
-               if (i != j) {
-                   if (rng.nextDouble() <= density) {
-                       graph[i][i] = 1;
-                       graph[j][j] = 1;
-                       graph[i][j] = 1;
-                       graph[j][i] = 1;
-                   }
+               if (rng.nextDouble() <= density) {
+                   graph[i][i] = 1;
+                   graph[j][j] = 1;
+                   graph[i][j] = 1;
+                   graph[j][i] = 1;
                }
            }
         }

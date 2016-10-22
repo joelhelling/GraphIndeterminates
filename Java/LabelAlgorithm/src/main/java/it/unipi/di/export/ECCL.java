@@ -19,7 +19,7 @@ public abstract class ECCL extends it.unipi.di.interfaces.ECC {
 	}
 
 	@Override
-	public Object solution()
+	public List<IntOpenHashSet> solution()
 	{
 		return this.solution;
 	}

@@ -31,7 +31,15 @@ public class ECCc extends ECCL {
 		
 		if(checkSolution) checkSolution();
 	}
-	
+
+	public void start(boolean check) {
+		solution = new ArrayList<IntOpenHashSet>();
+
+		expand0();
+
+		if (check) checkSolution();
+	}
+
 	@Override
 	public void expand0()
 	{

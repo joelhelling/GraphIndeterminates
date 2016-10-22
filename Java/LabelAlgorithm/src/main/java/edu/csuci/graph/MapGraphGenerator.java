@@ -6,13 +6,13 @@ import java.util.*;
  * LabelAlgorithm
  * California State University Channel Islands
  * Constructing an Indeterminate String from its Associated Graph
- * Created by Joel on 10/20/2016.
+ * Created by Joel on 10/21/2016.
  */
-public class ListGraphGenerator {
-    private static List<Set<Integer>> transformToList(int[][] adjMatrix) {
-        List<Set<Integer>> result = new ArrayList<>(adjMatrix.length);
+public class MapGraphGenerator {
+    private static Map<Integer, List<Integer>> transformToList(int[][] adjMatrix) {
+        Map<Integer, List<Integer>> result = new TreeMap<>();
         for (int i = 0; i < adjMatrix.length; i++) {
-            result.add(i, new HashSet<>(adjMatrix.length));
+            result.put(i, new ArrayList<>(adjMatrix.length));
         }
 
         for (int i = 0; i < adjMatrix.length; i++) {
@@ -26,7 +26,7 @@ public class ListGraphGenerator {
         return result;
     }
 
-    public static List<Set<Integer>> randomGraph(int n, double density, Random rng) {
+    public static Map<Integer, List<Integer>> randomGraph(int n, double density, Random rng) {
         int[][] result = new int[n][n];
 
         for (int i = 0; i < result.length; i++) {
@@ -42,24 +42,24 @@ public class ListGraphGenerator {
         return transformToList(result);
     }
 
-    public static int countEdges(List<Set<Integer>> graph) {
-        return graph.stream().map(Set::size).reduce(0, (x,y) -> x + y)/2;
+    public static int countEdges(Map<Integer, List<Integer>> graph) {
+        return graph.values().stream().mapToInt(List::size).sum()/2;
     }
 
-    public static boolean graphEquals(List<Set<Integer>> left, List<Set<Integer>> right) {
+    public static boolean graphEquals(Map<Integer, List<Integer>> left, Map<Integer, List<Integer>> right) {
         return left.equals(right);
     }
 
-    public static void printGraph(List<Set<Integer>> graph) {
+    public static void printGraph(Map<Integer, List<Integer>> graph) {
         StringBuilder res = new StringBuilder();
         res.append("Graph:\n");
         int line = 0;
-        for (Set<Integer> neighbors : graph) {
+        for (Map.Entry<Integer, List<Integer>> neighbors : graph.entrySet()) {
             res.append(line++).append(": [");
-            for (Integer i : neighbors) {
+            for (Integer i : neighbors.getValue()) {
                 res.append(i.toString()).append(", ");
             }
-            if (neighbors.size() > 0) {
+            if (neighbors.getValue().size() > 0) {
                 res.delete(res.length() - 2, res.length());
             }
             res.append("]\n");
