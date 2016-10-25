@@ -9,6 +9,24 @@ import java.util.Random;
  * Created by Joel on 9/28/2016.
  */
 public class MatrixGraphGenerator {
+    public static int[][] constructGraphFromBits(int vertices, long bits) {
+        int[][] graph = new int[vertices][vertices];
+        long mask = 0x1;
+
+        for (int i = 0; i < graph.length; i++) {
+            for (int j = i + 1; j  < graph[i].length; j++) {
+                if ((bits & mask) == 0x1) {
+                    graph[i][j] = 1;
+                    graph[j][i] = 1;
+                    graph[i][i] = 1;
+                    graph[j][j] = 1;
+                }
+                bits = bits >>> 1;
+            }
+        }
+
+        return graph;
+    }
     public static int[][] randomGraph(int n, double density, Random rng) {
         int[][] graph = new int[n][n];
 

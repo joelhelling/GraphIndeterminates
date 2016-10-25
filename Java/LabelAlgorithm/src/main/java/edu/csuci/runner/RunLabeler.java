@@ -30,6 +30,7 @@ public class RunLabeler {
     public static void main(String[] args) {
         Random rng = new Random(System.currentTimeMillis());
         OptionParser parser = new OptionParser();
+        OptionSpec<Void> alln = parser.accepts("alln", "Runs the labeling algorithm on all possible graphs on given number of vertices");
         OptionSpec<Void> nvertices = parser.accepts("nvertices", "Runs the labeling algorithm on random graphs with specified vertices");
         OptionSpec<Void> fastVertices = parser.accepts("fnvertices", "Runs the optimized labeling algorithm on random graphs with specified vertices");
         OptionSpec<Void> ascending = parser.accepts("ascending", "Runs the optimized labeling algorithm on random graphs ");
@@ -78,6 +79,13 @@ public class RunLabeler {
             } catch (FileNotFoundException fnfe) {
                 System.out.println("Unable to read from file: " + fnfe);
             }
+        } else if (options.has(alln)) {
+            try {
+                runAllGraphsNVertices(vertices.value(options), options.has(debug), output);
+            } catch (FileNotFoundException fnfe) {
+                System.out.println("Unable to read from file: " + fnfe);
+            }
+
         } else if (options.has(nvertices)) {
             try {
                 RunLabeler.runTrialsNVertices("Warm-up", warmUp.value(options), vertices.value(options), density.value(options), rng, options.has(debug), output);
@@ -421,6 +429,51 @@ public class RunLabeler {
         System.out.printf("Total %s Time: %d ms\n", trialName, totalTime);
         System.out.printf("Average %s Time per Graph: %d ms\n", trialName, totalTime/iterations);
         System.out.println("=== Ending " + trialName + " Phase ===");
+    }
+
+    private static void runAllGraphsNVertices(int vertices, boolean debug, PrintStream output) throws FileNotFoundException {
+        long start, end, total;
+
+        System.out.printf("Labeling all graphs on %d vertices", vertices);
+        output.printf("Labeling all graphs on %d vertices\n", vertices);
+        output.println("Edges -- Labels -- Time (milliseconds)");
+
+        total = 0;
+
+        long numGraphs = (long) Math.pow(2, vertices*(vertices - 1)/2);
+        for (long i = 0; i < numGraphs; i++) {
+            start = System.currentTimeMillis();
+            int[][] testData = MatrixGraphGenerator.constructGraphFromBits(vertices, i);
+            end = System.currentTimeMillis();
+            int edges = MatrixGraphGenerator.countEdges(testData);
+            System.out.printf("Setup %d: %d ms\n", i+1, end - start);
+            System.out.printf("Vertices: %d; Edges: %d\n", vertices, edges);
+            if (debug) {
+                MatrixGraphGenerator.printGraph(testData);
+            }
+
+            start = System.currentTimeMillis();
+            int[][] result = MatrixLabeler.labelGraph(testData);
+            end = System.currentTimeMillis();
+            total += end - start;
+            int labels = MatrixLabeler.countLabels(result);
+            System.out.printf("Run %d: %d Labels; %d ms\n", i+1, labels, end - start);
+            output.printf("%d\t%d\t%d\n", edges, labels, end - start);
+            if (debug) {
+                MatrixLabeler.printLabels(result);
+            }
+
+            if (debug) {
+                start = System.currentTimeMillis();
+                int[][] check = MatrixLabeler.checkLabeling(result);
+                end = System.currentTimeMillis();
+                MatrixGraphGenerator.printGraph(check);
+
+                System.out.printf("Check %d: %b %d ms\n", i + 1, MatrixGraphGenerator.graphEquals(testData, check) ? "PASSED" : "FAILED", end - start);
+            }
+        }
+        System.out.printf("Total Time: %d ms\n", total);
+        System.out.printf("Average Time per Graph: %d ms\n",  total/numGraphs);
     }
 
     private static void runSingleGraph(int[][] graph, boolean debug) {
