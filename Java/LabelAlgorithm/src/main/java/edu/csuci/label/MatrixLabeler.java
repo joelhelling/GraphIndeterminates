@@ -1,8 +1,6 @@
 package edu.csuci.label;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * LabelAlgorithm
@@ -19,7 +17,7 @@ public class MatrixLabeler {
 
         int[] currentClique = new int[graph.length];
 
-        int[] vertexOrder = runHeuristic(graph);
+        int[] vertexOrder = runHeuristic(graph, 0);
         System.out.println(Arrays.toString(vertexOrder));
 
         int ccIndex = 0;
@@ -41,7 +39,7 @@ public class MatrixLabeler {
                 labels[vvert][indexes[vvert]++] = lambda;
                 lambda++;
             } else {
-                for (w = v+1; w < vertexOrder.length; w++) {
+                for (w = v + 1; w < vertexOrder.length; w++) {
                     wvert = vertexOrder[w];
                     if (graph[vvert][wvert] == 0) {
                         continue;
@@ -57,7 +55,7 @@ public class MatrixLabeler {
                         }
                         labels[wvert][indexes[wvert]++] = lambda;
 
-                        for (q = w+1; q < vertexOrder.length; q++) {
+                        for (q = w + 1; q < vertexOrder.length; q++) {
                             qvert = vertexOrder[q];
                             if (graph[vvert][qvert] == 0) {
                                 continue;
@@ -81,7 +79,7 @@ public class MatrixLabeler {
                         for (cci = 0; cci < ccIndex; cci++) {
                             connections[vvert][currentClique[cci]] = 1;
                             connections[currentClique[cci]][vvert] = 1;
-                            for (ccj = cci+1; ccj < ccIndex; ccj++) {
+                            for (ccj = cci + 1; ccj < ccIndex; ccj++) {
                                 connections[currentClique[cci]][currentClique[ccj]] = 1;
                                 connections[currentClique[ccj]][currentClique[cci]] = 1;
                             }
@@ -96,21 +94,36 @@ public class MatrixLabeler {
         return labels;
     }
 
-    private static int[] runHeuristic(int[][] graph) {
-        int[] vertexOrder = new int[graph.length];
+    private static int[] runHeuristic(int[][] graph, int depth) {
+        List<Integer> vertexOrder = new ArrayList<>(graph.length);
+        final int[] neighborhoodSizes = new int[graph.length];
 
-        for (int i = 0; i < vertexOrder.length; i++) {
-            vertexOrder[i] = i;
+        for (int i = 0; i < graph.length; i++) {
+            vertexOrder.add(i);
+            neighborhoodSizes[i] = countNeighborhood(graph, i, depth);
         }
 
-        return vertexOrder;
+        Collections.sort(vertexOrder, (o1, o2) -> {
+            int res = Integer.compare(neighborhoodSizes[o1], neighborhoodSizes[o2]);
+            if (res == 0) {
+                return Integer.compare(o1, o2);
+            } else {
+                return res;
+            }
+        });
+
+        return vertexOrder.stream().mapToInt(x -> x).toArray();
+    }
+
+    private static int countNeighborhood(int[][] graph, int vertex, int depth) {
+        return vertex;
     }
 
     public static int[][] checkLabeling(int[][] labels) {
         int[][] graph = new int[labels.length][labels.length];
 
         for (int i = 0; i < graph.length; i++) {
-            for (int j = i+1; j < graph[i].length; j++) {
+            for (int j = i + 1; j < graph[i].length; j++) {
                 if (hasIntersection(labels[i], labels[j])) {
                     graph[i][i] = 1;
                     graph[i][j] = 1;
@@ -128,8 +141,8 @@ public class MatrixLabeler {
         int fIndex = 0;
         int sIndex = 0;
 
-        while(fIndex < fLabels.length && fLabels[fIndex] != 0) {
-            while(sIndex < sLabels.length && sLabels[sIndex] != 0 && sLabels[sIndex] <= fLabels[fIndex]) {
+        while (fIndex < fLabels.length && fLabels[fIndex] != 0) {
+            while (sIndex < sLabels.length && sLabels[sIndex] != 0 && sLabels[sIndex] <= fLabels[fIndex]) {
                 if (sLabels[sIndex] == fLabels[fIndex]) {
                     return true;
                 }
@@ -155,11 +168,14 @@ public class MatrixLabeler {
         res.append("Labels:\n");
 
         for (int i = 0; i < labels.length; i++) {
+            int j = 0;
             res.append(i).append(": [");
-            for (int j = 0; j < labels[i].length && labels[i][j] != 0; j++) {
+            for (j = 0; j < labels[i].length && labels[i][j] != 0; j++) {
                 res.append(labels[i][j]).append(", ");
             }
-            res.delete(res.length() - 2, res.length());
+            if (j > 0) {
+                res.delete(res.length() - 2, res.length());
+            }
             res.append("]\n");
         }
         System.out.println(res.toString());
