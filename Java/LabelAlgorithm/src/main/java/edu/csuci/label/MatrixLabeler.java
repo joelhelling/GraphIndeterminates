@@ -18,7 +18,6 @@ public class MatrixLabeler {
         int[] currentClique = new int[graph.length];
 
         int[] vertexOrder = runHeuristic(graph, 0);
-        System.out.println(Arrays.toString(vertexOrder));
 
         int ccIndex = 0;
 
@@ -112,11 +111,39 @@ public class MatrixLabeler {
             }
         });
 
+        System.out.println("Order: " + Arrays.toString(vertexOrder.toArray()));
+        System.out.println("Neighborhoods: " + Arrays.toString(neighborhoodSizes));
+
         return vertexOrder.stream().mapToInt(x -> x).toArray();
     }
 
     private static int countNeighborhood(int[][] graph, int vertex, int depth) {
-        return vertex;
+        Set<Integer> frontier = new HashSet<>();
+        Set<Integer> visitedVertices = new HashSet<>();
+
+        frontier.add(vertex);
+
+        int neighborhoodCount = frontier.size();
+
+        for (int i = 0; i < depth; i++) {
+            if (frontier.isEmpty()) {
+                return neighborhoodCount;
+            } else {
+                Set<Integer> newFrontier = new HashSet<>();
+                visitedVertices.addAll(frontier);
+                for (int v : frontier) {
+                    for (int j = 0; j < graph[v].length; j++) {
+                        if (v != j && graph[v][j] != 0 && !visitedVertices.contains(j)) {
+                            newFrontier.add(j);
+                        }
+                    }
+                }
+                neighborhoodCount += newFrontier.size();
+                frontier = newFrontier;
+            }
+        }
+
+        return neighborhoodCount;
     }
 
     public static int[][] checkLabeling(int[][] labels) {
