@@ -19,60 +19,68 @@ public class MatrixLabeler {
 
         int[] currentClique = new int[graph.length];
 
+        int[] vertexOrder = runHeuristic(graph);
+        System.out.println(Arrays.toString(vertexOrder));
+
         int ccIndex = 0;
 
         int lambda = 1;
 
         int v, w, q;
 
+        int vvert, wvert, qvert;
+
         boolean isSubset;
         int qi;
 
         int cci, ccj;
 
-        for (v = 0; v < graph.length; v++) {
-            if (graph[v][v] == 0) {
-                labels[v][indexes[v]++] = lambda;
+        for (v = 0; v < vertexOrder.length; v++) {
+            vvert = vertexOrder[v];
+            if (graph[vvert][vvert] == 0) {
+                labels[vvert][indexes[vvert]++] = lambda;
                 lambda++;
             } else {
-                for (w = v+1; w < graph.length; w++) {
-                    if (graph[v][w] == 0) {
+                for (w = v+1; w < vertexOrder.length; w++) {
+                    wvert = vertexOrder[w];
+                    if (graph[vvert][wvert] == 0) {
                         continue;
                     }
-                    if (connections[v][w] == 0) {
-                        currentClique[ccIndex++] = w;
-                        if (indexes[v] >= labels[v].length) {
-                            labels[v] = Arrays.copyOf(labels[v], labels[v].length * 2);
+                    if (connections[vvert][wvert] == 0) {
+                        currentClique[ccIndex++] = wvert;
+                        if (indexes[vvert] >= labels[vvert].length) {
+                            labels[vvert] = Arrays.copyOf(labels[vvert], labels[vvert].length * 2);
                         }
-                        labels[v][indexes[v]++] = lambda;
-                        if (indexes[w] >= labels[w].length) {
-                            labels[w] = Arrays.copyOf(labels[w], labels[w].length * 2);
+                        labels[vvert][indexes[vvert]++] = lambda;
+                        if (indexes[wvert] >= labels[wvert].length) {
+                            labels[wvert] = Arrays.copyOf(labels[wvert], labels[wvert].length * 2);
                         }
-                        labels[w][indexes[w]++] = lambda;
+                        labels[wvert][indexes[wvert]++] = lambda;
 
-                        for (q = w+1; q < graph.length; q++) {
-                            if (graph[v][q] == 0) {
+                        for (q = w+1; q < vertexOrder.length; q++) {
+                            qvert = vertexOrder[q];
+                            if (graph[vvert][qvert] == 0) {
                                 continue;
                             }
                             isSubset = true;
                             for (qi = 0; qi < ccIndex; qi++) {
-                                if (graph[q][currentClique[qi]] == 0) {
+                                if (graph[qvert][currentClique[qi]] == 0) {
                                     isSubset = false;
                                     break;
                                 }
                             }
                             if (isSubset) {
-                                currentClique[ccIndex++] = q;
-                                if (indexes[q] >= labels[q].length) {
-                                    labels[q] = Arrays.copyOf(labels[q], labels[q].length * 2);
+                                currentClique[ccIndex++] = qvert;
+                                if (indexes[qvert] >= labels[qvert].length) {
+                                    labels[qvert] = Arrays.copyOf(labels[qvert], labels[qvert].length * 2);
                                 }
-                                labels[q][indexes[q]++] = lambda;
+                                labels[qvert][indexes[qvert]++] = lambda;
                             }
                         }
 
                         for (cci = 0; cci < ccIndex; cci++) {
-                            connections[v][currentClique[cci]] = 1;
-                            connections[currentClique[cci]][v] = 1;
+                            connections[vvert][currentClique[cci]] = 1;
+                            connections[currentClique[cci]][vvert] = 1;
                             for (ccj = cci+1; ccj < ccIndex; ccj++) {
                                 connections[currentClique[cci]][currentClique[ccj]] = 1;
                                 connections[currentClique[ccj]][currentClique[cci]] = 1;
@@ -86,6 +94,16 @@ public class MatrixLabeler {
             }
         }
         return labels;
+    }
+
+    private static int[] runHeuristic(int[][] graph) {
+        int[] vertexOrder = new int[graph.length];
+
+        for (int i = 0; i < vertexOrder.length; i++) {
+            vertexOrder[i] = i;
+        }
+
+        return vertexOrder;
     }
 
     public static int[][] checkLabeling(int[][] labels) {
