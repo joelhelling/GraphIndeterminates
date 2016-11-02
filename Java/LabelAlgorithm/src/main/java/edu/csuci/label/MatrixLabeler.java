@@ -17,7 +17,7 @@ public class MatrixLabeler {
 
         int[] currentClique = new int[graph.length];
 
-        int[] vertexOrder = runHeuristic(graph, 0);
+        int[] vertexOrder = runHeuristic(graph, 2);
 
         int ccIndex = 0;
 
@@ -102,6 +102,9 @@ public class MatrixLabeler {
             neighborhoodSizes[i] = countNeighborhood(graph, i, depth);
         }
 
+
+        System.out.println("Original Order: " + Arrays.toString(vertexOrder.toArray()));
+        System.out.println("Neighborhoods: " + Arrays.toString(neighborhoodSizes));
         Collections.sort(vertexOrder, (o1, o2) -> {
             int res = Integer.compare(neighborhoodSizes[o1], neighborhoodSizes[o2]);
             if (res == 0) {
@@ -110,36 +113,35 @@ public class MatrixLabeler {
                 return res;
             }
         });
-
-        System.out.println("Order: " + Arrays.toString(vertexOrder.toArray()));
-        System.out.println("Neighborhoods: " + Arrays.toString(neighborhoodSizes));
+        System.out.println("New Order: " + Arrays.toString(vertexOrder.toArray()));
 
         return vertexOrder.stream().mapToInt(x -> x).toArray();
     }
 
     private static int countNeighborhood(int[][] graph, int vertex, int depth) {
-        Set<Integer> frontier = new HashSet<>();
-        Set<Integer> visitedVertices = new HashSet<>();
+        int[] frontier = new int[graph.length];
 
-        frontier.add(vertex);
+        frontier[vertex] = 1;
 
-        int neighborhoodCount = frontier.size();
+        int neighborhoodCount = 1;
+        boolean isEmpty = false;
 
-        for (int i = 0; i < depth; i++) {
-            if (frontier.isEmpty()) {
-                return neighborhoodCount;
+        for (int currentDepth = 1; currentDepth <= depth; currentDepth++) {
+            if (isEmpty) {
+                break;
             } else {
-                Set<Integer> newFrontier = new HashSet<>();
-                visitedVertices.addAll(frontier);
-                for (int v : frontier) {
-                    for (int j = 0; j < graph[v].length; j++) {
-                        if (v != j && graph[v][j] != 0 && !visitedVertices.contains(j)) {
-                            newFrontier.add(j);
+                isEmpty = true;
+                for (int j = 0; j < frontier.length; j++) {
+                    if (frontier[j] == currentDepth) {
+                        for (int k = 0; k < graph[j].length; k++) {
+                            if (k != j && graph[j][k] != 0 && frontier[k] == 0) {
+                                isEmpty = false;
+                                neighborhoodCount += 1;
+                                frontier[k] = currentDepth + 1;
+                            }
                         }
                     }
                 }
-                neighborhoodCount += newFrontier.size();
-                frontier = newFrontier;
             }
         }
 
