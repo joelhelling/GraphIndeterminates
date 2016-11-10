@@ -58,7 +58,7 @@ public class MatrixLabeler {
                         }
                         labels[wvert][indexes[wvert]++] = lambda;
 
-                        for (q = w + 1; q < vertexOrder.length; q++) {
+                        for (q = 0; q < vertexOrder.length; q++) {
                             qvert = vertexOrder[q];
                             if (graph[vvert][qvert] == 0) {
                                 continue;
