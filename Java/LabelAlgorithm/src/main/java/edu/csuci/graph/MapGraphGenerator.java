@@ -9,7 +9,66 @@ import java.util.*;
  * Created by Joel on 10/21/2016.
  */
 public class MapGraphGenerator {
-    private static Map<Integer, List<Integer>> transformToList(int[][] adjMatrix) {
+    private int vertices;
+    private double density;
+    private Random rng;
+    private Map<Integer, List<Integer>> graph;
+
+    public MapGraphGenerator(int vertices, double density) {
+        this.vertices = vertices;
+        this.density = density;
+        this.rng = new Random(System.currentTimeMillis());
+        this.graph = new TreeMap<>();
+    }
+
+    public MapGraphGenerator(int vertices, double density, long seed) {
+        this.vertices = vertices;
+        this.density = density;
+        this.rng = new Random(seed);
+        this.graph = new TreeMap<>();
+    }
+
+    public int getVertices() {
+        return vertices;
+    }
+
+    public void setVertices(int vertices) {
+        this.vertices = vertices;
+    }
+
+    public double getDensity() {
+        return density;
+    }
+
+    public void randomizeDensity() {
+        this.density = rng.nextDouble();
+    }
+
+    public void setDensity(double density) {
+        this.density = density;
+    }
+
+    public Map<Integer, List<Integer>> getGraph() {
+        return graph;
+    }
+
+    public Map<Integer, List<Integer>> generateGraph() {
+        int[][] result = new int[vertices][vertices];
+
+        for (int i = 0; i < result.length; i++) {
+            for (int j = i + 1; j < result[i].length; j++) {
+                if (rng.nextDouble() <= density) {
+                    result[i][i] = 1;
+                    result[j][j] = 1;
+                    result[i][j] = 1;
+                    result[j][i] = 1;
+                }
+            }
+        }
+        return transformToList(result);
+    }
+
+    private Map<Integer, List<Integer>> transformToList(int[][] adjMatrix) {
         Map<Integer, List<Integer>> result = new TreeMap<>();
         for (int i = 0; i < adjMatrix.length; i++) {
             result.put(i, new ArrayList<>(adjMatrix.length));
@@ -26,28 +85,12 @@ public class MapGraphGenerator {
         return result;
     }
 
-    public static Map<Integer, List<Integer>> randomGraph(int n, double density, Random rng) {
-        int[][] result = new int[n][n];
-
-        for (int i = 0; i < result.length; i++) {
-            for (int j = i + 1; j < result[i].length; j++) {
-                if (rng.nextDouble() <= density) {
-                    result[i][i] = 1;
-                    result[j][j] = 1;
-                    result[i][j] = 1;
-                    result[j][i] = 1;
-                }
-            }
-        }
-        return transformToList(result);
-    }
-
-    public static int countEdges(Map<Integer, List<Integer>> graph) {
+    public int countEdges() {
         return graph.values().stream().mapToInt(List::size).sum()/2;
     }
 
-    public static boolean graphEquals(Map<Integer, List<Integer>> left, Map<Integer, List<Integer>> right) {
-        return left.equals(right);
+    public boolean graphEquals(Map<Integer, List<Integer>> other) {
+        return graph.equals(other);
     }
 
     public static void printGraph(Map<Integer, List<Integer>> graph) {

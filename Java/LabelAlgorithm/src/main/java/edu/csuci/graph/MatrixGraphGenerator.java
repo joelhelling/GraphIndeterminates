@@ -9,8 +9,63 @@ import java.util.Random;
  * Created by Joel on 9/28/2016.
  */
 public class MatrixGraphGenerator {
-    public static int[][] constructGraphFromBits(int vertices, long bits) {
-        int[][] graph = new int[vertices][vertices];
+    private int vertices;
+    private double density;
+    private Random rng;
+    private int[][] graph;
+
+    public MatrixGraphGenerator(int vertices, double density) {
+        this.vertices = vertices;
+        this.density = density;
+        this.rng = new Random(System.currentTimeMillis());
+        this.graph = new int[0][0];
+    }
+
+    public MatrixGraphGenerator(int vertices, double density, long seed) {
+        this.vertices = vertices;
+        this.density = density;
+        this.rng = new Random(seed);
+        this.graph = new int[0][0];
+    }
+
+    public int getVertices() {
+        return vertices;
+    }
+
+    public void setVertices(int vertices) {
+        this.vertices = vertices;
+    }
+
+    public double getDensity() {
+        return density;
+    }
+
+    public void randomizeDensity() {
+        this.density = rng.nextDouble();
+    }
+
+    public int[][] getGraph() {
+        return graph;
+    }
+
+    public int[][] generateGraph() {
+        graph = new int[vertices][vertices];
+
+        for (int i = 0; i < graph.length; i++) {
+            for (int j = i+1; j < graph[i].length; j++) {
+                if (rng.nextDouble() <= density) {
+                    graph[i][i] = 1;
+                    graph[j][j] = 1;
+                    graph[i][j] = 1;
+                    graph[j][i] = 1;
+                }
+            }
+        }
+        return graph;
+    }
+
+    public int[][] generateGraphFromUpperRightTriangleBits(long bits) {
+        graph = new int[vertices][vertices];
         long mask = 0x1;
 
         for (int i = 0; i < graph.length; i++) {
@@ -24,26 +79,10 @@ public class MatrixGraphGenerator {
                 bits = bits >>> 1;
             }
         }
-
-        return graph;
-    }
-    public static int[][] randomGraph(int n, double density, Random rng) {
-        int[][] graph = new int[n][n];
-
-        for (int i = 0; i < graph.length; i++) {
-           for (int j = i+1; j < graph[i].length; j++) {
-               if (rng.nextDouble() <= density) {
-                   graph[i][i] = 1;
-                   graph[j][j] = 1;
-                   graph[i][j] = 1;
-                   graph[j][i] = 1;
-               }
-           }
-        }
         return graph;
     }
 
-    public static int countEdges(int[][] graph) {
+     public int countEdges() {
         int count = 0;
         for (int i = 0; i < graph.length; i++) {
             for (int j = i+1; j < graph[i].length; j++) {
@@ -55,10 +94,10 @@ public class MatrixGraphGenerator {
         return count;
     }
 
-    public static boolean graphEquals(int[][] src, int[][] test) {
-        for (int i = 0; i < src.length; i++) {
-            for (int j = 0; j < src[i].length; j++) {
-                if (src[i][j] != test[i][j]) {
+    public boolean graphEquals(int[][] other) {
+        for (int i = 0; i < graph.length; i++) {
+            for (int j = 0; j < graph[i].length; j++) {
+                if (graph[i][j] != other[i][j]) {
                     return false;
                 }
             }

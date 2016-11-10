@@ -1,7 +1,7 @@
 package edu.csuci.runner;
 
 import de.unijena.minet.KellermanKouAlgorithm;
-import edu.csuci.fileparser.AsciiArcsIO;
+import edu.csuci.Heuristic.MatrixHeuristic;
 import edu.csuci.graph.ListGraphGenerator;
 import edu.csuci.graph.MapGraphGenerator;
 import edu.csuci.graph.MatrixGraphGenerator;
@@ -18,7 +18,10 @@ import joptsimple.OptionSpec;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * LabelAlgorithm
@@ -27,15 +30,22 @@ import java.util.*;
  * Created by Joel on 9/29/16.
  */
 public class RunLabeler {
-    public static void main(String[] args) {
-        Random rng = new Random(System.currentTimeMillis());
+    public static void main(String[] args) throws IOException {
         OptionParser parser = new OptionParser();
-        OptionSpec<Void> alln = parser.accepts("alln", "Runs the labeling algorithm on all possible graphs on given number of vertices");
-        OptionSpec<Void> nvertices = parser.accepts("nvertices", "Runs the labeling algorithm on random graphs with specified vertices");
-        OptionSpec<Void> fastVertices = parser.accepts("fnvertices", "Runs the optimized labeling algorithm on random graphs with specified vertices");
-        OptionSpec<Void> ascending = parser.accepts("ascending", "Runs the optimized labeling algorithm on random graphs ");
+
+        /* Trials Available */
+        OptionSpec<Void> alln = parser.accepts("alln", "Runs the matrix labeling algorithm on all possible graphs on given number of vertices");
+        OptionSpec<Void> nvertices = parser.accepts("nvertices", "Runs the list labeling algorithm on random graphs with specified vertices");
+        OptionSpec<Void> fastVertices = parser.accepts("fnvertices", "Runs the matrix labeling algorithm on random graphs with specified vertices");
+        OptionSpec<Void> ascending = parser.accepts("ascending", "Runs the matrix labeling algorithm on random graphs ");
         OptionSpec<Void> cgm = parser.accepts("cgm", "Run the edge clique covering algorithm found in Clique Covering of Large Real-World Networks");
         OptionSpec<Void> kellermankou = parser.accepts("kk", "Run the edge clique covering algorithm described in Covering Edges by Cliques with Regard to Keyword Conflicts and Intersection Graphs");
+
+        OptionSpec<Integer> ascHeuristic = parser.accepts("heurasc", "Runs the labeling algorithm with the vertices ordered by ascending neighborhood size with a specified depth")
+                .withRequiredArg().ofType(Integer.class).defaultsTo(0);
+        OptionSpec<Integer> descHeuristic = parser.accepts("heurdesc", "Runs the labeling algorithm with the vertices ordered by descending neighborhood size with a specified depth")
+                .withRequiredArg().ofType(Integer.class);
+
         OptionSpec<Void> debug = parser.accepts("debug", "If specified, runs checking algorithm and prints out results");
 
         OptionSpec<Void> help = parser.acceptsAll(Arrays.asList("help","h"), "Help").forHelp();
@@ -48,8 +58,6 @@ public class RunLabeler {
         OptionSpec<Double> density = parser.accepts("density", "Between 0.0 and 1.0. Probability of having an edge between two vertices")
                 .withRequiredArg().ofType(Double.class).defaultsTo(0.5);
         OptionSpec<String> outFile = parser.accepts("output", "The file to output data to")
-                .withRequiredArg().ofType(String.class);
-        OptionSpec<String> inFile = parser.accepts("input", "The file to read graph from with current supported formats")
                 .withRequiredArg().ofType(String.class);
 
         OptionSet options = parser.parse(args);
@@ -67,114 +75,55 @@ public class RunLabeler {
             output = System.out;
         }
 
-        if (options.has(help)) {
-            try {
-                parser.printHelpOn(System.out);
-            } catch (IOException ioe) {
-                System.out.println(ioe);
-            }
-        } else if (options.has(inFile)) {
-            try {
-                runSingleGraph(AsciiArcsIO.readGraph(inFile.value(options)), options.has(debug));
-            } catch (FileNotFoundException fnfe) {
-                System.out.println("Unable to read from file: " + fnfe);
-            }
-        } else if (options.has(alln)) {
-            try {
-                runAllGraphsNVertices(vertices.value(options), options.has(debug), output);
-            } catch (FileNotFoundException fnfe) {
-                System.out.println("Unable to read from file: " + fnfe);
-            }
-
-        } else if (options.has(nvertices)) {
-            try {
-                RunLabeler.runTrialsNVertices("Warm-up", warmUp.value(options), vertices.value(options), density.value(options), rng, options.has(debug), output);
-                RunLabeler.runTrialsNVertices("Benchmark", iterations.value(options), vertices.value(options), density.value(options), rng, options.has(debug), output);
-            } catch (IOException ioe) {
-                System.out.println("File opening error: " + ioe);
-            }
-        } else if (options.has(fastVertices)) {
-            try {
-                RunLabeler.runFastTrialsNVertices("Warm-up", warmUp.value(options), vertices.value(options), density.value(options), rng, options.has(debug), output);
-                RunLabeler.runFastTrialsNVertices("Benchmark", iterations.value(options), vertices.value(options), density.value(options), rng, options.has(debug), output);
-            } catch (IOException ioe) {
-                System.out.println("File opening error: " + ioe);
-            }
-        } else if (options.has(ascending)) {
-            try {
-                RunLabeler.runAscendingVertices(warmUp.value(options), iterations.value(options), vertices.value(options), rng, options.has(debug), output);
-            } catch (IOException ioe) {
-                System.out.println("File opening error: " + ioe);
-            }
-        } else if (options.has(cgm)) {
-            try {
-                RunLabeler.runCGMVertices("Warm-up", warmUp.value(options), vertices.value(options), density.value(options), rng, options.has(debug), output);
-                RunLabeler.runCGMVertices("Benchmark", iterations.value(options), vertices.value(options), density.value(options), rng, options.has(debug), output);
-            } catch (IOException ioe) {
-                System.out.println("File opening error: " + ioe);
-            }
-        } else if (options.has(kellermankou)) {
-            try {
-                RunLabeler.runKKVertices("Warm-up", warmUp.value(options), vertices.value(options), density.value(options), rng, options.has(debug), output);
-                RunLabeler.runKKVertices("Benchmark", iterations.value(options), vertices.value(options), density.value(options), rng, options.has(debug), output);
-            } catch (IOException ioe) {
-                System.out.println("File opening error: " + ioe);
-            }
+        MatrixHeuristic mh;
+        if (options.has("heurdesc")) {
+            mh = MatrixHeuristic.descendingNeiborhood(descHeuristic.value(options));
         } else {
-            try {
+            mh = MatrixHeuristic.ascendingNeighborhood(ascHeuristic.value(options));
+        }
+
+        if (options.has(help)) {
                 parser.printHelpOn(System.out);
-            } catch (IOException ioe) {
-                System.out.println(ioe);
-            }
+        } else if (options.has(alln)) {
+                runAllGraphsNVertices(vertices.value(options), mh, options.has(debug), output);
+        } else if (options.has(nvertices)) {
+                ListGraphGenerator lgg = new ListGraphGenerator(vertices.value(options), density.value(options));
+                RunLabeler.runTrialsNVertices("Warm-up", warmUp.value(options), lgg, options.has(debug), output);
+                RunLabeler.runTrialsNVertices("Benchmark", iterations.value(options), lgg, options.has(debug), output);
+        } else if (options.has(fastVertices)) {
+                MatrixGraphGenerator mgg = new MatrixGraphGenerator(vertices.value(options), density.value(options));
+                RunLabeler.runFastTrialsNVertices("Warm-up", warmUp.value(options), mgg, mh, options.has(debug), output);
+                RunLabeler.runFastTrialsNVertices("Benchmark", iterations.value(options), mgg, mh, options.has(debug), output);
+        } else if (options.has(ascending)) {
+                MatrixGraphGenerator mgg = new MatrixGraphGenerator(vertices.value(options), density.value(options));
+                RunLabeler.runAscendingVertices(warmUp.value(options), iterations.value(options), vertices.value(options), mgg, mh, options.has(debug), output);
+        } else if (options.has(cgm)) {
+                MapGraphGenerator mgg = new MapGraphGenerator(vertices.value(options), density.value(options));
+                RunLabeler.runCGMVertices("Warm-up", warmUp.value(options), mgg, options.has(debug), output);
+                RunLabeler.runCGMVertices("Benchmark", iterations.value(options), mgg, options.has(debug), output);
+        } else if (options.has(kellermankou)) {
+                MatrixGraphGenerator mgg = new MatrixGraphGenerator(vertices.value(options), density.value(options));
+                RunLabeler.runKKVertices("Warm-up", warmUp.value(options), mgg, options.has(debug), output);
+                RunLabeler.runKKVertices("Benchmark", iterations.value(options), mgg, options.has(debug), output);
+        } else {
+                parser.printHelpOn(System.out);
         }
         output.close();
     }
 
-    private static void runTrials(String trialName, int iterations, int lowerBound, int upperBound, double density, Random rng) {
+    private static void runTrialsNVertices(String trialName, int iterations, ListGraphGenerator lgg, boolean debug, PrintStream output)  throws IOException {
         long totalTime, start, end;
         System.out.println("=== Starting " + trialName + " Phase ===");
-        totalTime = 0;
-        for (int i = 0; i < iterations; i++) {
-            int vertices = rng.nextInt(upperBound - lowerBound + 1) + lowerBound;
-
-            start = System.currentTimeMillis();
-            List<Set<Integer>> testData = ListGraphGenerator.randomGraph(vertices, density, rng);
-            end = System.currentTimeMillis();
-            System.out.printf("Setup %d: %d ms\n", i+1, end - start);
-            System.out.printf("Vertices: %d; Density: %f; Edges: %d\n", vertices, density, ListGraphGenerator.countEdges(testData));
-            ListGraphGenerator.printGraph(testData);
-
-            start = System.currentTimeMillis();
-            List<Set<Integer>> result = ListLabeler.labelGraph(testData);
-            end = System.currentTimeMillis();
-            totalTime += end - start;
-            System.out.printf("Run %d: %d Labels; %d ms\n", i+1, ListLabeler.countLabels(result), end - start);
-            ListLabeler.printLabels(result);
-
-            start = System.currentTimeMillis();
-            List<Set<Integer>> check = ListLabeler.checkLabeling(result);
-            ListGraphGenerator.printGraph(check);
-            end = System.currentTimeMillis();
-            System.out.printf("Check %d: %b %d ms\n", i+1, (check.equals(testData))?"PASSED":"FAILED", end - start);
-        }
-        System.out.printf("Total %s Time: %d ms\n", trialName, totalTime);
-        System.out.printf("Average %s Time per Graph: %d ms\n", trialName, totalTime/iterations);
-        System.out.println("=== Ending " + trialName + " Phase ===");
-    }
-
-    private static void runTrialsNVertices(String trialName, int iterations, int vertices, double density, Random rng, boolean debug, PrintStream output)  throws IOException {
-        long totalTime, start, end;
-        System.out.println("=== Starting " + trialName + " Phase ===");
-        output.printf("Trial: %s with %d vertices\n", trialName, vertices);
+        output.printf("Trial: %s with %d vertices\n", trialName, lgg.getVertices());
         output.println("Edges -- Labels -- Time (milliseconds)");
         totalTime = 0;
         for (int i = 0; i < iterations; i++) {
             start = System.currentTimeMillis();
-            List<Set<Integer>> testData = ListGraphGenerator.randomGraph(vertices, density, rng);
+            List<Set<Integer>> testData = lgg.generateGraph();
             end = System.currentTimeMillis();
-            int edges = ListGraphGenerator.countEdges(testData);
+            int edges = lgg.countEdges();
             System.out.printf("Setup %d: %d ms\n", i+1, end - start);
-            System.out.printf("Vertices: %d; Density: %f; Edges: %d\n", vertices, density, edges);
+            System.out.printf("Vertices: %d; Density: %f; Edges: %d\n", lgg.getVertices(), lgg.getDensity(), edges);
             if (debug) {
                 ListGraphGenerator.printGraph(testData);
             }
@@ -195,7 +144,7 @@ public class RunLabeler {
                 List<Set<Integer>> check = ListLabeler.checkLabeling(result);
                 ListGraphGenerator.printGraph(check);
                 end = System.currentTimeMillis();
-                System.out.printf("Check %d: %b %d ms\n", i + 1, (check.equals(testData)) ? "PASSED" : "FAILED", end - start);
+                System.out.printf("Check %d: %b %d ms\n", i + 1, lgg.graphEquals(check) ? "PASSED" : "FAILED", end - start);
             }
         }
         System.out.printf("Total %s Time: %d ms\n", trialName, totalTime);
@@ -203,25 +152,25 @@ public class RunLabeler {
         System.out.println("=== Ending " + trialName + " Phase ===");
     }
 
-    private static void runFastTrialsNVertices(String trialName, int iterations, int vertices, double density, Random rng, boolean debug, PrintStream output)  throws IOException {
+    private static void runFastTrialsNVertices(String trialName, int iterations, MatrixGraphGenerator mgg, MatrixHeuristic mh, boolean debug, PrintStream output)  throws IOException {
         long totalTime, start, end;
         System.out.println("=== Starting " + trialName + " Phase ===");
-        output.printf("Trial HRSS: %s with %d vertices\n", trialName, vertices);
+        output.printf("Trial HRSS: %s with %d vertices\n", trialName, mgg.getVertices());
         output.println("Edges -- Labels -- Time (milliseconds)");
         totalTime = 0;
         for (int i = 0; i < iterations; i++) {
             start = System.currentTimeMillis();
-            int[][] testData = MatrixGraphGenerator.randomGraph(vertices, density, rng);
+            int[][] testData = mgg.generateGraph();
             end = System.currentTimeMillis();
-            int edges = MatrixGraphGenerator.countEdges(testData);
+            int edges = mgg.countEdges();
             System.out.printf("Setup %d: %d ms\n", i+1, end - start);
-            System.out.printf("Vertices: %d; Density: %f; Edges: %d\n", vertices, density, edges);
+            System.out.printf("Vertices: %d; Density: %f; Edges: %d\n", mgg.getVertices(), mgg.getDensity(), edges);
             if (debug) {
                 MatrixGraphGenerator.printGraph(testData);
             }
 
             start = System.currentTimeMillis();
-            int[][] result = MatrixLabeler.labelGraph(testData);
+            int[][] result = MatrixLabeler.labelGraph(testData, mh);
             end = System.currentTimeMillis();
             totalTime += end - start;
             int labels = MatrixLabeler.countLabels(result);
@@ -237,7 +186,7 @@ public class RunLabeler {
                 end = System.currentTimeMillis();
                 MatrixGraphGenerator.printGraph(check);
 
-                System.out.printf("Check %d: %b %d ms\n", i + 1, MatrixGraphGenerator.graphEquals(testData, check) ? "PASSED" : "FAILED", end - start);
+                System.out.printf("Check %d: %b %d ms\n", i + 1, mgg.graphEquals(check) ? "PASSED" : "FAILED", end - start);
             }
         }
         System.out.printf("Total %s Time: %d ms\n", trialName, totalTime);
@@ -245,7 +194,7 @@ public class RunLabeler {
         System.out.println("=== Ending " + trialName + " Phase ===");
     }
 
-    private static void runAscendingVertices(int warmups, int iterations, int vertices, Random rng, boolean debug, PrintStream output) throws IOException {
+    private static void runAscendingVertices(int warmups, int iterations, int vertices, MatrixGraphGenerator mgg, MatrixHeuristic mh, boolean debug, PrintStream output) throws IOException {
         System.out.printf("Starting Trial HRSS: %d to %d vertices\n", 1, vertices);
         output.println("Edges -- Labels -- Time (milliseconds)");
         long start, end, total, grandTotal;
@@ -258,20 +207,22 @@ public class RunLabeler {
 
             total = 0;
 
+            mgg.setVertices(i);
+
             for (int j = 0; j < warmups; j++) {
-                double density = rng.nextDouble();
+                mgg.randomizeDensity();
                 start = System.currentTimeMillis();
-                int[][] testData = MatrixGraphGenerator.randomGraph(i, density, rng);
+                int[][] testData = mgg.generateGraph();
                 end = System.currentTimeMillis();
-                int edges = MatrixGraphGenerator.countEdges(testData);
+                int edges = mgg.countEdges();
                 System.out.printf("Setup %d: %d ms\n", j+1, end - start);
-                System.out.printf("Vertices: %d; Density: %f; Edges: %d\n", i, density, edges);
+                System.out.printf("Vertices: %d; Density: %f; Edges: %d\n", i, mgg.getDensity(), edges);
                 if (debug) {
                     MatrixGraphGenerator.printGraph(testData);
                 }
 
                 start = System.currentTimeMillis();
-                int[][] result = MatrixLabeler.labelGraph(testData);
+                int[][] result = MatrixLabeler.labelGraph(testData, mh);
                 end = System.currentTimeMillis();
                 total += end - start;
                 int labels = MatrixLabeler.countLabels(result);
@@ -287,7 +238,7 @@ public class RunLabeler {
                     end = System.currentTimeMillis();
                     MatrixGraphGenerator.printGraph(check);
 
-                    System.out.printf("Check %d: %b %d ms\n", j+1, MatrixGraphGenerator.graphEquals(testData, check) ? "PASSED" : "FAILED", end - start);
+                    System.out.printf("Check %d: %b %d ms\n", j+1, mgg.graphEquals(check) ? "PASSED" : "FAILED", end - start);
                 }
             }
             System.out.printf("Total Warm-up Time: %d ms\n", total);
@@ -298,19 +249,19 @@ public class RunLabeler {
 
             output.printf("Trial: Benchmark with %d vertices\n", i);
             for (int j = 0; j < iterations; j++) {
-                double density = rng.nextDouble();
+                mgg.randomizeDensity();
                 start = System.currentTimeMillis();
-                int[][] testData = MatrixGraphGenerator.randomGraph(i, density, rng);
+                int[][] testData = mgg.generateGraph();
                 end = System.currentTimeMillis();
-                int edges = MatrixGraphGenerator.countEdges(testData);
+                int edges = mgg.countEdges();
                 System.out.printf("Setup %d: %d ms\n", j+1, end - start);
-                System.out.printf("Vertices: %d; Density: %f; Edges: %d\n", i, density, edges);
+                System.out.printf("Vertices: %d; Density: %f; Edges: %d\n", i, mgg.getDensity(), edges);
                 if (debug) {
                     MatrixGraphGenerator.printGraph(testData);
                 }
 
                 start = System.currentTimeMillis();
-                int[][] result = MatrixLabeler.labelGraph(testData);
+                int[][] result = MatrixLabeler.labelGraph(testData, mh);
                 end = System.currentTimeMillis();
                 total += end - start;
                 int labels = MatrixLabeler.countLabels(result);
@@ -326,7 +277,7 @@ public class RunLabeler {
                     end = System.currentTimeMillis();
                     MatrixGraphGenerator.printGraph(check);
 
-                    System.out.printf("Check %d: %b %d ms\n", j+1, MatrixGraphGenerator.graphEquals(testData, check) ? "PASSED" : "FAILED", end - start);
+                    System.out.printf("Check %d: %b %d ms\n", j+1, mgg.graphEquals(check) ? "PASSED" : "FAILED", end - start);
                 }
             }
             System.out.printf("Total Benchmark Time: %d ms\n", total);
@@ -340,21 +291,21 @@ public class RunLabeler {
         System.out.println("=== Ending Benchmark ===");
     }
 
-    private static void runCGMVertices(String trialName, int iterations, int vertices, double density, Random rng, boolean debug, PrintStream output)  throws IOException {
+    private static void runCGMVertices(String trialName, int iterations, MapGraphGenerator mgg, boolean debug, PrintStream output)  throws IOException {
         long totalTime, start, end;
         System.out.println("=== Starting " + trialName + " Phase ===");
-        output.printf("Trial CGM: %s with %d vertices\n", trialName, vertices);
+        output.printf("Trial CGM: %s with %d vertices\n", trialName, mgg.getVertices());
         output.println("Edges -- Labels -- Time (milliseconds)");
         totalTime = 0;
         for (int i = 0; i < iterations; i++) {
             start = System.currentTimeMillis();
-            Map<Integer, List<Integer>> testData = MapGraphGenerator.randomGraph(vertices, density, rng);
+            Map<Integer, List<Integer>> testData = mgg.generateGraph();
             ListGraph lg = new ListGraph(testData);
             ECCc coverer = new ECCc(lg);
             end = System.currentTimeMillis();
-            int edges = MapGraphGenerator.countEdges(testData);
+            int edges = mgg.countEdges();
             System.out.printf("Setup %d: %d ms\n", i+1, end - start);
-            System.out.printf("Vertices: %d; Density: %f; Edges: %d\n", vertices, density, edges);
+            System.out.printf("Vertices: %d; Density: %f; Edges: %d\n", mgg.getVertices(), mgg.getDensity(), edges);
             if (debug) {
                 MapGraphGenerator.printGraph(testData);
             }
@@ -391,19 +342,19 @@ public class RunLabeler {
         System.out.println("=== Ending " + trialName + " Phase ===");
     }
 
-    private static void runKKVertices(String trialName, int iterations, int vertices, double density, Random rng, boolean debug, PrintStream output)  throws IOException {
+    private static void runKKVertices(String trialName, int iterations, MatrixGraphGenerator mgg, boolean debug, PrintStream output)  throws IOException {
         long totalTime, start, end;
         System.out.println("=== Starting " + trialName + " Phase ===");
-        output.printf("Trial KK: %s with %d vertices\n", trialName, vertices);
+        output.printf("Trial KK: %s with %d vertices\n", trialName, mgg.getVertices());
         output.println("Edges -- Labels -- Time (milliseconds)");
         totalTime = 0;
         for (int i = 0; i < iterations; i++) {
             start = System.currentTimeMillis();
-            int[][] testData = MatrixGraphGenerator.randomGraph(vertices, density, rng);
+            int[][] testData = mgg.generateGraph();
             end = System.currentTimeMillis();
-            int edges = MatrixGraphGenerator.countEdges(testData);
+            int edges = mgg.countEdges();
             System.out.printf("Setup %d: %d ms\n", i+1, end - start);
-            System.out.printf("Vertices: %d; Density: %f; Edges: %d\n", vertices, density, edges);
+            System.out.printf("Vertices: %d; Density: %f; Edges: %d\n", mgg.getVertices(), mgg.getDensity(), edges);
             if (debug) {
                 MatrixGraphGenerator.printGraph(testData);
             }
@@ -431,8 +382,9 @@ public class RunLabeler {
         System.out.println("=== Ending " + trialName + " Phase ===");
     }
 
-    private static void runAllGraphsNVertices(int vertices, boolean debug, PrintStream output) throws FileNotFoundException {
+    private static void runAllGraphsNVertices(int vertices, MatrixHeuristic mh, boolean debug, PrintStream output) throws FileNotFoundException {
         long start, end, total;
+        MatrixGraphGenerator mgg = new MatrixGraphGenerator(vertices, 0);
 
         System.out.printf("Labeling all graphs on %d vertices", vertices);
         output.printf("Labeling all graphs on %d vertices\n", vertices);
@@ -443,9 +395,9 @@ public class RunLabeler {
         long numGraphs = (long) Math.pow(2, vertices*(vertices - 1)/2);
         for (long i = 0; i < numGraphs; i++) {
             start = System.currentTimeMillis();
-            int[][] testData = MatrixGraphGenerator.constructGraphFromBits(vertices, i);
+            int[][] testData = mgg.generateGraphFromUpperRightTriangleBits(i);
             end = System.currentTimeMillis();
-            int edges = MatrixGraphGenerator.countEdges(testData);
+            int edges = mgg.countEdges();
             System.out.printf("Setup %d: %d ms\n", i+1, end - start);
             System.out.printf("Vertices: %d; Edges: %d\n", vertices, edges);
             if (debug) {
@@ -453,7 +405,7 @@ public class RunLabeler {
             }
 
             start = System.currentTimeMillis();
-            int[][] result = MatrixLabeler.labelGraph(testData);
+            int[][] result = MatrixLabeler.labelGraph(testData, mh);
             end = System.currentTimeMillis();
             total += end - start;
             int labels = MatrixLabeler.countLabels(result);
@@ -469,36 +421,10 @@ public class RunLabeler {
                 end = System.currentTimeMillis();
                 MatrixGraphGenerator.printGraph(check);
 
-                System.out.printf("Check %d: %b %d ms\n", i + 1, MatrixGraphGenerator.graphEquals(testData, check) ? "PASSED" : "FAILED", end - start);
+                System.out.printf("Check %d: %b %d ms\n", i + 1, mgg.graphEquals(check) ? "PASSED" : "FAILED", end - start);
             }
         }
         System.out.printf("Total Time: %d ms\n", total);
         System.out.printf("Average Time per Graph: %d ms\n",  total/numGraphs);
-    }
-
-    private static void runSingleGraph(int[][] graph, boolean debug) {
-        long start, end;
-
-        System.out.printf("Labeling graph with %d vertices and %d edges\n", graph.length, MatrixGraphGenerator.countEdges(graph));
-
-        if (debug) {
-            MatrixGraphGenerator.printGraph(graph);
-        }
-
-        start = System.currentTimeMillis();
-        int[][] labels = MatrixLabeler.labelGraph(graph);
-        end = System.currentTimeMillis();
-        int numLabels = MatrixLabeler.countLabels(labels);
-        System.out.printf("Labeling completed with %d labels in %d ms\n", numLabels, end - start);
-
-        if (debug) {
-            MatrixLabeler.printLabels(labels);
-            start = System.currentTimeMillis();
-            int[][] check = MatrixLabeler.checkLabeling(labels);
-            end = System.currentTimeMillis();
-            MatrixGraphGenerator.printGraph(check);
-
-            System.out.printf("Check %b in %d ms", MatrixGraphGenerator.graphEquals(graph, check), end - start);
-        }
     }
 }

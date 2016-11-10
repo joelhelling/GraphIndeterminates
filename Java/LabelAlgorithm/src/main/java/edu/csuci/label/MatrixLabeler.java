@@ -1,6 +1,10 @@
 package edu.csuci.label;
 
-import java.util.*;
+import edu.csuci.Heuristic.MatrixHeuristic;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * LabelAlgorithm
@@ -9,7 +13,7 @@ import java.util.*;
  * Created by Joel on 9/28/16.
  */
 public class MatrixLabeler {
-    public static int[][] labelGraph(int[][] graph) {
+    public static int[][] labelGraph(int[][] graph, MatrixHeuristic heuristic) {
         int[][] labels = new int[graph.length][graph.length];
         int[][] connections = new int[graph.length][graph.length];
 
@@ -17,7 +21,7 @@ public class MatrixLabeler {
 
         int[] currentClique = new int[graph.length];
 
-        int[] vertexOrder = runHeuristic(graph, 2);
+        int[] vertexOrder = heuristic.runHeuristic(graph);
 
         int ccIndex = 0;
 
@@ -93,60 +97,6 @@ public class MatrixLabeler {
         return labels;
     }
 
-    private static int[] runHeuristic(int[][] graph, int depth) {
-        List<Integer> vertexOrder = new ArrayList<>(graph.length);
-        final int[] neighborhoodSizes = new int[graph.length];
-
-        for (int i = 0; i < graph.length; i++) {
-            vertexOrder.add(i);
-            neighborhoodSizes[i] = countNeighborhood(graph, i, depth);
-        }
-
-
-        System.out.println("Original Order: " + Arrays.toString(vertexOrder.toArray()));
-        System.out.println("Neighborhoods: " + Arrays.toString(neighborhoodSizes));
-        Collections.sort(vertexOrder, (o1, o2) -> {
-            int res = Integer.compare(neighborhoodSizes[o1], neighborhoodSizes[o2]);
-            if (res == 0) {
-                return Integer.compare(o1, o2);
-            } else {
-                return res;
-            }
-        });
-        System.out.println("New Order: " + Arrays.toString(vertexOrder.toArray()));
-
-        return vertexOrder.stream().mapToInt(x -> x).toArray();
-    }
-
-    private static int countNeighborhood(int[][] graph, int vertex, int depth) {
-        int[] frontier = new int[graph.length];
-
-        frontier[vertex] = 1;
-
-        int neighborhoodCount = 1;
-        boolean isEmpty = false;
-
-        for (int currentDepth = 1; currentDepth <= depth; currentDepth++) {
-            if (isEmpty) {
-                break;
-            } else {
-                isEmpty = true;
-                for (int j = 0; j < frontier.length; j++) {
-                    if (frontier[j] == currentDepth) {
-                        for (int k = 0; k < graph[j].length; k++) {
-                            if (k != j && graph[j][k] != 0 && frontier[k] == 0) {
-                                isEmpty = false;
-                                neighborhoodCount += 1;
-                                frontier[k] = currentDepth + 1;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        return neighborhoodCount;
-    }
 
     public static int[][] checkLabeling(int[][] labels) {
         int[][] graph = new int[labels.length][labels.length];
