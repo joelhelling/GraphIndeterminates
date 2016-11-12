@@ -1,7 +1,10 @@
 package edu.csuci.runner;
 
 import de.unijena.minet.KellermanKouAlgorithm;
+import edu.csuci.Heuristic.DummyMatrixHeuristic;
 import edu.csuci.Heuristic.MatrixHeuristic;
+import edu.csuci.Heuristic.NeighborhoodMatrixHeuristic;
+import edu.csuci.Heuristic.ShuffleMatrixHeuristic;
 import edu.csuci.graph.ListGraphGenerator;
 import edu.csuci.graph.MapGraphGenerator;
 import edu.csuci.graph.MatrixGraphGenerator;
@@ -37,14 +40,17 @@ public class RunLabeler {
         OptionSpec<Void> alln = parser.accepts("alln", "Runs the matrix labeling algorithm on all possible graphs on given number of vertices");
         OptionSpec<Void> nvertices = parser.accepts("nvertices", "Runs the list labeling algorithm on random graphs with specified vertices");
         OptionSpec<Void> fastVertices = parser.accepts("fnvertices", "Runs the matrix labeling algorithm on random graphs with specified vertices");
+        OptionSpec<Void> shuffleOrder = parser.accepts("shuffle", "Runs the matrix labeling algorithm on a random graph with different absolute ordering of the vertices and find the least number of symbols");
         OptionSpec<Void> ascending = parser.accepts("ascending", "Runs the matrix labeling algorithm on random graphs ");
         OptionSpec<Void> cgm = parser.accepts("cgm", "Run the edge clique covering algorithm found in Clique Covering of Large Real-World Networks");
         OptionSpec<Void> kellermankou = parser.accepts("kk", "Run the edge clique covering algorithm described in Covering Edges by Cliques with Regard to Keyword Conflicts and Intersection Graphs");
 
         OptionSpec<Integer> ascHeuristic = parser.accepts("heurasc", "Runs the labeling algorithm with the vertices ordered by ascending neighborhood size with a specified depth")
-                .withRequiredArg().ofType(Integer.class).defaultsTo(0);
+                .availableIf(fastVertices).withRequiredArg().ofType(Integer.class).defaultsTo(0);
         OptionSpec<Integer> descHeuristic = parser.accepts("heurdesc", "Runs the labeling algorithm with the vertices ordered by descending neighborhood size with a specified depth")
-                .withRequiredArg().ofType(Integer.class);
+                .availableIf(fastVertices).withRequiredArg().ofType(Integer.class).defaultsTo(0);
+        OptionSpec<Void> shuffleHeuristic = parser.accepts("heurshuffle", "Runs the labeling algorithm with the vertices ordered randomly")
+                .availableIf(fastVertices).availableIf(shuffleOrder);
 
         OptionSpec<Void> debug = parser.accepts("debug", "If specified, runs checking algorithm and prints out results");
 
@@ -76,39 +82,92 @@ public class RunLabeler {
         }
 
         MatrixHeuristic mh;
-        if (options.has("heurdesc")) {
-            mh = MatrixHeuristic.descendingNeiborhood(descHeuristic.value(options));
+        if (options.has(descHeuristic)) {
+            mh = NeighborhoodMatrixHeuristic.descendingNeighborhood(descHeuristic.value(options));
+        } else if (options.has(ascHeuristic)){
+            mh = NeighborhoodMatrixHeuristic.ascendingNeighborhood(ascHeuristic.value(options));
+        } else if (options.has(shuffleHeuristic)) {
+            mh = new ShuffleMatrixHeuristic();
         } else {
-            mh = MatrixHeuristic.ascendingNeighborhood(ascHeuristic.value(options));
+            mh = new DummyMatrixHeuristic();
         }
 
         if (options.has(help)) {
-                parser.printHelpOn(System.out);
+            parser.printHelpOn(System.out);
         } else if (options.has(alln)) {
-                runAllGraphsNVertices(vertices.value(options), mh, options.has(debug), output);
+            runAllGraphsNVertices(vertices.value(options), mh, options.has(debug), output);
         } else if (options.has(nvertices)) {
-                ListGraphGenerator lgg = new ListGraphGenerator(vertices.value(options), density.value(options));
-                RunLabeler.runTrialsNVertices("Warm-up", warmUp.value(options), lgg, options.has(debug), output);
-                RunLabeler.runTrialsNVertices("Benchmark", iterations.value(options), lgg, options.has(debug), output);
+            ListGraphGenerator lgg = new ListGraphGenerator(vertices.value(options), density.value(options));
+            RunLabeler.runTrialsNVertices("Warm-up", warmUp.value(options), lgg, options.has(debug), output);
+            RunLabeler.runTrialsNVertices("Benchmark", iterations.value(options), lgg, options.has(debug), output);
         } else if (options.has(fastVertices)) {
-                MatrixGraphGenerator mgg = new MatrixGraphGenerator(vertices.value(options), density.value(options));
-                RunLabeler.runFastTrialsNVertices("Warm-up", warmUp.value(options), mgg, mh, options.has(debug), output);
-                RunLabeler.runFastTrialsNVertices("Benchmark", iterations.value(options), mgg, mh, options.has(debug), output);
+            MatrixGraphGenerator mgg = new MatrixGraphGenerator(vertices.value(options), density.value(options));
+            RunLabeler.runFastTrialsNVertices("Warm-up", warmUp.value(options), mgg, mh, options.has(debug), output);
+            RunLabeler.runFastTrialsNVertices("Benchmark", iterations.value(options), mgg, mh, options.has(debug), output);
+        } else if (options.has(shuffleOrder)) {
+            MatrixGraphGenerator mgg = new MatrixGraphGenerator(vertices.value(options), density.value(options));
+            RunLabeler.sampleRandomOrder(mgg, mh, options.has(debug), output);
         } else if (options.has(ascending)) {
-                MatrixGraphGenerator mgg = new MatrixGraphGenerator(vertices.value(options), density.value(options));
-                RunLabeler.runAscendingVertices(warmUp.value(options), iterations.value(options), vertices.value(options), mgg, mh, options.has(debug), output);
+            MatrixGraphGenerator mgg = new MatrixGraphGenerator(vertices.value(options), density.value(options));
+            RunLabeler.runAscendingVertices(warmUp.value(options), iterations.value(options), vertices.value(options), mgg, mh, options.has(debug), output);
         } else if (options.has(cgm)) {
-                MapGraphGenerator mgg = new MapGraphGenerator(vertices.value(options), density.value(options));
-                RunLabeler.runCGMVertices("Warm-up", warmUp.value(options), mgg, options.has(debug), output);
-                RunLabeler.runCGMVertices("Benchmark", iterations.value(options), mgg, options.has(debug), output);
+            MapGraphGenerator mgg = new MapGraphGenerator(vertices.value(options), density.value(options));
+            RunLabeler.runCGMVertices("Warm-up", warmUp.value(options), mgg, options.has(debug), output);
+            RunLabeler.runCGMVertices("Benchmark", iterations.value(options), mgg, options.has(debug), output);
         } else if (options.has(kellermankou)) {
-                MatrixGraphGenerator mgg = new MatrixGraphGenerator(vertices.value(options), density.value(options));
-                RunLabeler.runKKVertices("Warm-up", warmUp.value(options), mgg, options.has(debug), output);
-                RunLabeler.runKKVertices("Benchmark", iterations.value(options), mgg, options.has(debug), output);
+            MatrixGraphGenerator mgg = new MatrixGraphGenerator(vertices.value(options), density.value(options));
+            RunLabeler.runKKVertices("Warm-up", warmUp.value(options), mgg, options.has(debug), output);
+            RunLabeler.runKKVertices("Benchmark", iterations.value(options), mgg, options.has(debug), output);
         } else {
-                parser.printHelpOn(System.out);
+            parser.printHelpOn(System.out);
         }
         output.close();
+    }
+
+    private static void runAllGraphsNVertices(int vertices, MatrixHeuristic mh, boolean debug, PrintStream output) throws FileNotFoundException {
+        long start, end, total;
+        MatrixGraphGenerator mgg = new MatrixGraphGenerator(vertices, 0);
+
+        System.out.printf("Labeling all graphs on %d vertices", vertices);
+        output.printf("Labeling all graphs on %d vertices\n", vertices);
+        output.println("Edges -- Labels -- Time (milliseconds)");
+
+        total = 0;
+
+        long numGraphs = (long) Math.pow(2, vertices*(vertices - 1)/2);
+        for (long i = 0; i < numGraphs; i++) {
+            start = System.currentTimeMillis();
+            int[][] testData = mgg.generateGraphFromUpperRightTriangleBits(i);
+            end = System.currentTimeMillis();
+            int edges = mgg.countEdges();
+            System.out.printf("Setup %d: %d ms\n", i+1, end - start);
+            System.out.printf("Vertices: %d; Edges: %d\n", vertices, edges);
+            if (debug) {
+                MatrixGraphGenerator.printGraph(testData);
+            }
+
+            start = System.currentTimeMillis();
+            int[][] result = MatrixLabeler.labelGraph(testData, mh);
+            end = System.currentTimeMillis();
+            total += end - start;
+            int labels = MatrixLabeler.countLabels(result);
+            System.out.printf("Run %d: %d Labels; %d ms\n", i+1, labels, end - start);
+            output.printf("%d\t%d\t%d\n", edges, labels, end - start);
+            if (debug) {
+                MatrixLabeler.printLabels(result);
+            }
+
+            if (debug) {
+                start = System.currentTimeMillis();
+                int[][] check = MatrixLabeler.checkLabeling(result);
+                end = System.currentTimeMillis();
+                MatrixGraphGenerator.printGraph(check);
+
+                System.out.printf("Check %d: %b %d ms\n", i + 1, mgg.graphEquals(check) ? "PASSED" : "FAILED", end - start);
+            }
+        }
+        System.out.printf("Total Time: %d ms\n", total);
+        System.out.printf("Average Time per Graph: %d ms\n",  total/numGraphs);
     }
 
     private static void runTrialsNVertices(String trialName, int iterations, ListGraphGenerator lgg, boolean debug, PrintStream output)  throws IOException {
@@ -192,6 +251,56 @@ public class RunLabeler {
         System.out.printf("Total %s Time: %d ms\n", trialName, totalTime);
         System.out.printf("Average %s Time per Graph: %d ms\n", trialName, totalTime/iterations);
         System.out.println("=== Ending " + trialName + " Phase ===");
+    }
+
+    private static void sampleRandomOrder(MatrixGraphGenerator mgg, MatrixHeuristic mh, boolean debug, PrintStream output) {
+        long total, start, end;
+        int iterations = (int) Math.sqrt(mgg.getVertices());
+
+        output.printf("Trial HRSS shuffle with %d vertices and %d iterations\n", mgg.getVertices(), iterations);
+        output.println("Edges -- Labels -- Time (milliseconds)");
+
+        start = System.currentTimeMillis();
+        int[][] testData = mgg.generateGraph();
+        end = System.currentTimeMillis();
+        int edges = mgg.countEdges();
+        System.out.printf("Setup: %d ms\n", end - start);
+        System.out.printf("Vertices: %d; Density: %f; Edges: %d\n", mgg.getVertices(), mgg.getDensity(), edges);
+        if (debug) {
+            MatrixGraphGenerator.printGraph(testData);
+        }
+
+        int smallestNumLabels = Integer.MAX_VALUE;
+        total = 0;
+        for (int i = 0; i < iterations; i++) {
+            start = System.currentTimeMillis();
+            int[][] result = MatrixLabeler.labelGraph(testData, mh);
+            end = System.currentTimeMillis();
+            total += end - start;
+            int labels = MatrixLabeler.countLabels(result);
+            System.out.printf("Run %d: %d Labels; %d ms\n", i+1, labels, end - start);
+            output.printf("%d\t%d\t%d\n", edges, labels, end - start);
+
+            if (labels < smallestNumLabels) {
+                smallestNumLabels = labels;
+            }
+            if (debug) {
+                MatrixLabeler.printLabels(result);
+            }
+
+            if (debug) {
+                start = System.currentTimeMillis();
+                int[][] check = MatrixLabeler.checkLabeling(result);
+                end = System.currentTimeMillis();
+                MatrixGraphGenerator.printGraph(check);
+
+                System.out.printf("Check %d: %b %d ms\n", i + 1, mgg.graphEquals(check) ? "PASSED" : "FAILED", end - start);
+            }
+        }
+        System.out.printf("Total Time: %d ms\n", total);
+        System.out.printf("Average Time per Graph: %d ms\n", total/iterations);
+        System.out.printf("Fewest number of labels: %d labels\n", smallestNumLabels);
+        output.printf("Fewest number of labels: %d labels\n", smallestNumLabels);
     }
 
     private static void runAscendingVertices(int warmups, int iterations, int vertices, MatrixGraphGenerator mgg, MatrixHeuristic mh, boolean debug, PrintStream output) throws IOException {
@@ -380,51 +489,5 @@ public class RunLabeler {
         System.out.printf("Total %s Time: %d ms\n", trialName, totalTime);
         System.out.printf("Average %s Time per Graph: %d ms\n", trialName, totalTime/iterations);
         System.out.println("=== Ending " + trialName + " Phase ===");
-    }
-
-    private static void runAllGraphsNVertices(int vertices, MatrixHeuristic mh, boolean debug, PrintStream output) throws FileNotFoundException {
-        long start, end, total;
-        MatrixGraphGenerator mgg = new MatrixGraphGenerator(vertices, 0);
-
-        System.out.printf("Labeling all graphs on %d vertices", vertices);
-        output.printf("Labeling all graphs on %d vertices\n", vertices);
-        output.println("Edges -- Labels -- Time (milliseconds)");
-
-        total = 0;
-
-        long numGraphs = (long) Math.pow(2, vertices*(vertices - 1)/2);
-        for (long i = 0; i < numGraphs; i++) {
-            start = System.currentTimeMillis();
-            int[][] testData = mgg.generateGraphFromUpperRightTriangleBits(i);
-            end = System.currentTimeMillis();
-            int edges = mgg.countEdges();
-            System.out.printf("Setup %d: %d ms\n", i+1, end - start);
-            System.out.printf("Vertices: %d; Edges: %d\n", vertices, edges);
-            if (debug) {
-                MatrixGraphGenerator.printGraph(testData);
-            }
-
-            start = System.currentTimeMillis();
-            int[][] result = MatrixLabeler.labelGraph(testData, mh);
-            end = System.currentTimeMillis();
-            total += end - start;
-            int labels = MatrixLabeler.countLabels(result);
-            System.out.printf("Run %d: %d Labels; %d ms\n", i+1, labels, end - start);
-            output.printf("%d\t%d\t%d\n", edges, labels, end - start);
-            if (debug) {
-                MatrixLabeler.printLabels(result);
-            }
-
-            if (debug) {
-                start = System.currentTimeMillis();
-                int[][] check = MatrixLabeler.checkLabeling(result);
-                end = System.currentTimeMillis();
-                MatrixGraphGenerator.printGraph(check);
-
-                System.out.printf("Check %d: %b %d ms\n", i + 1, mgg.graphEquals(check) ? "PASSED" : "FAILED", end - start);
-            }
-        }
-        System.out.printf("Total Time: %d ms\n", total);
-        System.out.printf("Average Time per Graph: %d ms\n",  total/numGraphs);
     }
 }
