@@ -23,5 +23,89 @@ jar {
                 'Implementation-Version': version,
                 'Main-Class': 'edu.csuci.runner.RunLabeler'
     }
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it)}}
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it)} }
+}
+
+task hrss(dependsOn: classes, type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+
+    minHeapSize = '1G'
+    maxHeapSize = '8G'
+    main = 'edu.csuci.runner.RunLabeler'
+
+    def date = new Date()
+    def fileName = 'hrss_' + date.format('MMddyy_hh:mm:ssa') + '.txt'
+    args = ['--fnvertices', '--vertices', '1000', 'iterations', '100', 'warmup', '20', '--density', '0.5', '--output', fileName]
+}
+
+task hrss_ascending(dependsOn: classes, type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+
+    minHeapSize = '1G'
+    maxHeapSize = '8G'
+    main = 'edu.csuci.runner.RunLabeler'
+
+    def date = new Date()
+    def fileName = 'hrss_ascending_' + date.format('MMddyy_hh:mm:ssa') + '.txt'
+    args = ['--fnvertices', '--heurasc', '1', '--vertices', '1000', 'iterations', '100', 'warmup', '20', '--density', '0.5', '--output', fileName]
+}
+
+task hrss_descending(dependsOn: classes, type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+
+    minHeapSize = '1G'
+    maxHeapSize = '8G'
+    main = 'edu.csuci.runner.RunLabeler'
+
+    def date = new Date()
+    def fileName = 'hrss_descending_' + date.format('MMddyy_hh:mm:ssa') + '.txt'
+    args = ['--fnvertices', '--heurdesc', '1', '--vertices', '1000', 'iterations', '100', 'warmup', '20', '--density', '0.5', '--output', fileName]
+}
+
+task cgm(dependsOn: classes, type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+
+    minHeapSize = '1G'
+    maxHeapSize = '8G'
+    main = 'edu.csuci.runner.RunLabeler'
+
+    def date = new Date()
+    def fileName = 'cgm_' + date.format('MMddyy_hh:mm:ssa') + '.txt'
+    args = ['--cgm', '--vertices', '1000', 'iterations', '100', 'warmup', '20', '--density', '0.5', '--output', fileName]
+}
+
+task kk(dependsOn: classes, type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+
+    minHeapSize = '1G'
+    maxHeapSize = '8G'
+    main = 'edu.csuci.runner.RunLabeler'
+
+    def date = new Date()
+    def fileName = 'kk_' + date.format('MMddyy_hh:mm:ssa') + '.txt'
+    args = ['--kk', '--vertices', '1000', 'iterations', '100', 'warmup', '20', '--density', '0.5', '--output', fileName]
+}
+
+task ascending(dependsOn: classes, type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+
+    minHeapSize = '1G'
+    maxHeapSize = '8G'
+    main = 'edu.csuci.runner.RunLabeler'
+
+    def date = new Date()
+    def fileName = 'ascending_' + date.format('MMddyy_hh:mm:ssa') + '.txt'
+    args = ['--ascending', '--vertices', '1000', 'iterations', '100', 'warmup', '20', '--output', fileName]
+}
+
+task shuffle(dependsOn: classes, type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+
+    minHeapSize = '1G'
+    maxHeapSize = '8G'
+    main = 'edu.csuci.runner.RunLabeler'
+
+    def date = new Date()
+    def fileName = 'shuffle_' + date.format('MMddyy_hh:mm:ssa') + '.txt'
+    args = ['--shuffle', '--heurshuffle', '--vertices', '1000', '--density', '0.5', '--output', fileName]
 }

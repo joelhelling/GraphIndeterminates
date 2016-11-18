@@ -1,6 +1,9 @@
 package edu.csuci.Heuristic;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 /**
  * LabelAlgorithm
@@ -37,11 +40,7 @@ public class NeighborhoodMatrixHeuristic implements MatrixHeuristic {
 
         neighborhoodComparator.setNeighborhoodSizes(neighborhoodSizes);
 
-        System.out.println("Original Order: " + Arrays.toString(vertexOrder.toArray()));
-        System.out.println("Neighborhoods: " + Arrays.toString(neighborhoodSizes));
         Collections.sort(vertexOrder, neighborhoodComparator);
-        System.out.println("New Order: " + Arrays.toString(vertexOrder.toArray()));
-
         return vertexOrder.stream().mapToInt(x -> x).toArray();
     }
 
