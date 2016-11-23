@@ -1,8 +1,10 @@
 package edu.csuci.trial;
 
-import edu.csuci.Heuristic.DummyMatrixHeuristic;
-import edu.csuci.Heuristic.MatrixHeuristic;
 import edu.csuci.graph.MatrixGraphGenerator;
+import edu.csuci.heuristic.DummyComparator;
+import edu.csuci.heuristic.DummyMatrixHeuristic;
+import edu.csuci.heuristic.MatrixHeuristic;
+import edu.csuci.heuristic.QComparator;
 import edu.csuci.label.MatrixLabeler;
 
 import java.io.PrintStream;
@@ -19,6 +21,7 @@ public class AllGraphsTrial implements Trial {
     private final PrintStream output;
     private final MatrixGraphGenerator graphGenerator;
     private final MatrixHeuristic heuristic;
+    private final QComparator qComparator;
     private int[][] labelResult;
 
     public AllGraphsTrial(int vertices, boolean debug, PrintStream output, MatrixGraphGenerator graphGenerator) {
@@ -27,6 +30,7 @@ public class AllGraphsTrial implements Trial {
         this.output = output;
         this.graphGenerator = graphGenerator;
         this.heuristic = new DummyMatrixHeuristic();
+        this.qComparator = new DummyComparator();
         this.labelResult = null;
     }
 
@@ -64,7 +68,7 @@ public class AllGraphsTrial implements Trial {
     private long testRun() {
         long start, end;
         start = System.currentTimeMillis();
-        labelResult = MatrixLabeler.labelGraph(graphGenerator.getGraph(), heuristic);
+        labelResult = MatrixLabeler.labelGraph(graphGenerator.getGraph(), heuristic, qComparator);
         end = System.currentTimeMillis();
         int labels = MatrixLabeler.countLabels(labelResult);
         System.out.printf("Run: %d Labels; %d ms\n", labels, end - start);

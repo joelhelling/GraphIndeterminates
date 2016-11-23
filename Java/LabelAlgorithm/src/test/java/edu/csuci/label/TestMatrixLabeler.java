@@ -1,5 +1,7 @@
 package edu.csuci.label;
 
+import edu.csuci.heuristic.DummyComparator;
+import edu.csuci.heuristic.DummyMatrixHeuristic;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -19,7 +21,7 @@ public class TestMatrixLabeler {
     public void givenAGraphThatContainsThreeCliqueThenUseThreeLabels() {
         int[][] graph = {{1,1,0,1,1},{1,1,0,0,1},{0,0,1,0,1},{1,0,0,1,1},{1,1,1,1,1}};
 
-        int[][] labels = MatrixLabeler.labelGraph(graph);
+        int[][] labels = MatrixLabeler.labelGraph(graph, new DummyMatrixHeuristic(), new DummyComparator());
 
         List<List<Integer>> l = new ArrayList<>(labels.length);
         for (int[] label : labels) {
@@ -47,7 +49,7 @@ public class TestMatrixLabeler {
                 {0, 0, 1, 0, 1, 1, 1, 1},
                 {1, 1, 1, 1, 1, 1, 1, 1}
         };
-        int[][] labels = MatrixLabeler.labelGraph(graph);
+        int[][] labels = MatrixLabeler.labelGraph(graph, new DummyMatrixHeuristic(), new DummyComparator());
 
         List<List<Integer>> l = new ArrayList<>(labels.length);
         for (int[] label : labels) {
@@ -87,7 +89,7 @@ public class TestMatrixLabeler {
                 {0, 0, 1, 0, 1, 0, 1, 1, 1, 1},
                 {0, 1, 1, 1, 1, 1, 1, 1, 1, 1},
         };
-        int[][] labels = MatrixLabeler.labelGraph(graph);
+        int[][] labels = MatrixLabeler.labelGraph(graph, new DummyMatrixHeuristic(), new DummyComparator());
 
         List<List<Integer>> l = new ArrayList<>(labels.length);
         for (int[] label : labels) {

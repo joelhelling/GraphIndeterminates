@@ -24,7 +24,8 @@ public class TestListGraphGenerator {
 
         Random rng = new Random(10);
 
-        Assert.assertEquals(ListGraphGenerator.randomGraph(4, 0.00, rng), result);
+        ListGraphGenerator lgg = new ListGraphGenerator(4, rng.nextDouble(), 10);
+        Assert.assertEquals(lgg.generateGraph(), result);
     }
 
     @Test
@@ -37,6 +38,7 @@ public class TestListGraphGenerator {
 
         Random rng = new Random(10);
 
-        Assert.assertEquals(ListGraphGenerator.randomGraph(4, 1.00, rng), result);
+        ListGraphGenerator lgg = new ListGraphGenerator(4, rng.nextDouble(), 10);
+        Assert.assertEquals(lgg.generateGraph(), result);
     }
 }

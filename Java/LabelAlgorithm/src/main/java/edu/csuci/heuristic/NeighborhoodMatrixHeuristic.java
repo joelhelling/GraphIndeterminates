@@ -1,4 +1,4 @@
-package edu.csuci.Heuristic;
+package edu.csuci.heuristic;
 
 import java.util.ArrayList;
 import java.util.Comparator;

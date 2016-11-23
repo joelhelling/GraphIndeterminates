@@ -1,12 +1,9 @@
 package edu.csuci.runner;
 
-import edu.csuci.Heuristic.DummyMatrixHeuristic;
-import edu.csuci.Heuristic.MatrixHeuristic;
-import edu.csuci.Heuristic.NeighborhoodMatrixHeuristic;
-import edu.csuci.Heuristic.ShuffleMatrixHeuristic;
 import edu.csuci.graph.ListGraphGenerator;
 import edu.csuci.graph.MapGraphGenerator;
 import edu.csuci.graph.MatrixGraphGenerator;
+import edu.csuci.heuristic.*;
 import edu.csuci.trial.*;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
@@ -35,6 +32,9 @@ public class CommandLineParser {
     private final OptionSpec<Integer> ascHeuristic;
     private final OptionSpec<Integer> descHeuristic;
     private final OptionSpec<Void> shuffleHeuristic;
+
+    private final OptionSpec<Void> ascQComp;
+    private final OptionSpec<Void> descQComp;
 
     private final OptionSpec<Void> debug;
 
@@ -67,6 +67,13 @@ public class CommandLineParser {
         shuffleHeuristic = parser.accepts("heurshuffle", "Runs the labeling algorithm with the vertices ordered randomly")
                 .availableIf(fastVertices).availableIf(shuffleOrder);
 
+
+        ascQComp = parser.accepts("qcompasc", "Runs the labeling algorithm with q vertices ordered by the number the labels the vertex currently has ascending")
+                .availableIf(fastVertices);
+        descQComp = parser.accepts("qcompdesc", "Runs the labeling algorithm with q vertices ordered by the number the labels the vertex currently has descending")
+                .availableIf(fastVertices);
+
+
         debug = parser.accepts("debug", "If specified, runs checking algorithm and prints out results");
 
         help = parser.acceptsAll(Arrays.asList("help","h"), "Help").forHelp();
@@ -87,6 +94,7 @@ public class CommandLineParser {
     public Trial parseArgs() throws IOException {
         PrintStream output = parseOutput();
         MatrixHeuristic mh = parseHeuristic();
+        QComparator qc = parserComparator();
 
         if (options.has(help)) {
             parser.printHelpOn(System.out);
@@ -98,13 +106,13 @@ public class CommandLineParser {
             return new ListTrial("HRSS", warmUp.value(options), iterations.value(options), options.has(debug), output, lgg);
         } else if (options.has(fastVertices)) {
             MatrixGraphGenerator mgg = new MatrixGraphGenerator(vertices.value(options), density.value(options));
-            return new MatrixTrial("HRSS", warmUp.value(options), iterations.value(options), options.has(debug), output, mgg, mh);
+            return new MatrixTrial("HRSS", warmUp.value(options), iterations.value(options), options.has(debug), output, mgg, mh, qc);
         } else if (options.has(shuffleOrder)) {
             MatrixGraphGenerator mgg = new MatrixGraphGenerator(vertices.value(options), density.value(options));
-            return new ShuffleTrial("Shuffle", warmUp.value(options), iterations.value(options), options.has(debug), output, mgg);
+            return new ShuffleTrial("Shuffle", warmUp.value(options), iterations.value(options), options.has(debug), output, mgg, qc);
         } else if (options.has(ascending)) {
             MatrixGraphGenerator mgg = new MatrixGraphGenerator(vertices.value(options), density.value(options));
-            return new AscendingTrial("Ascending", warmUp.value(options), iterations.value(options), options.has(debug), output, mgg, mh, vertices.value(options));
+            return new AscendingTrial("Ascending", warmUp.value(options), iterations.value(options), options.has(debug), output, mgg, mh, qc, vertices.value(options));
         } else if (options.has(cgm)) {
             MapGraphGenerator mgg = new MapGraphGenerator(vertices.value(options), density.value(options));
             return new CGMTrial("CGM", warmUp.value(options), iterations.value(options), options.has(debug), output, mgg);
@@ -139,6 +147,16 @@ public class CommandLineParser {
             return new ShuffleMatrixHeuristic();
         } else {
             return new DummyMatrixHeuristic();
+        }
+    }
+
+    private QComparator parserComparator() {
+        if (options.has(ascQComp)) {
+            return new AscendingLabelCountQComparator();
+        } else if (options.has(descQComp)) {
+            return new DescendinglabelCountQComparator();
+        } else {
+            return new DummyComparator();
         }
     }
 }

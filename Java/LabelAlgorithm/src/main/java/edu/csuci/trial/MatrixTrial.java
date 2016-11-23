@@ -1,7 +1,8 @@
 package edu.csuci.trial;
 
-import edu.csuci.Heuristic.MatrixHeuristic;
 import edu.csuci.graph.MatrixGraphGenerator;
+import edu.csuci.heuristic.MatrixHeuristic;
+import edu.csuci.heuristic.QComparator;
 import edu.csuci.label.MatrixLabeler;
 
 import java.io.PrintStream;
@@ -15,13 +16,15 @@ import java.io.PrintStream;
 public class MatrixTrial extends TwoStageTrial {
     private final MatrixGraphGenerator graphGenerator;
     private final MatrixHeuristic heuristic;
+    private final QComparator qComparator;
     private int[][] labelResult;
 
     public MatrixTrial(String name, int warmUp, int iterations, boolean debug, PrintStream output,
-                       MatrixGraphGenerator graphGenerator, MatrixHeuristic heuristic) {
+                       MatrixGraphGenerator graphGenerator, MatrixHeuristic heuristic, QComparator qComparator) {
         super(name, warmUp, iterations, debug, output);
         this.graphGenerator = graphGenerator;
         this.heuristic = heuristic;
+        this.qComparator = qComparator;
         this.labelResult = null;
     }
 
@@ -43,7 +46,7 @@ public class MatrixTrial extends TwoStageTrial {
     protected long testRun() {
         long start, end;
         start = System.currentTimeMillis();
-        labelResult = MatrixLabeler.labelGraph(graphGenerator.getGraph(), heuristic);
+        labelResult = MatrixLabeler.labelGraph(graphGenerator.getGraph(), heuristic, qComparator);
         end = System.currentTimeMillis();
         int labels = MatrixLabeler.countLabels(labelResult);
         System.out.printf("Run: %d Labels; %d ms\n", labels, end - start);

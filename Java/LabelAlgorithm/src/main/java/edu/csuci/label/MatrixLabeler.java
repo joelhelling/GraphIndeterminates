@@ -1,6 +1,7 @@
 package edu.csuci.label;
 
-import edu.csuci.Heuristic.MatrixHeuristic;
+import edu.csuci.heuristic.MatrixHeuristic;
+import edu.csuci.heuristic.QComparator;
 
 import java.util.*;
 
@@ -11,7 +12,7 @@ import java.util.*;
  * Created by Joel on 9/28/16.
  */
 public class MatrixLabeler {
-    public static int[][] labelGraph(int[][] graph, MatrixHeuristic heuristic) {
+    public static int[][] labelGraph(int[][] graph, MatrixHeuristic vHeuristic, QComparator qComparator) {
         int[][] labels = new int[graph.length][graph.length];
         int[][] connections = new int[graph.length][graph.length];
 
@@ -21,7 +22,7 @@ public class MatrixLabeler {
 
         int[] currentClique = new int[graph.length];
 
-        int[] vertexOrder = heuristic.runHeuristic(graph);
+        int[] vertexOrder = vHeuristic.runHeuristic(graph);
 
         List<Integer> qOrder = new ArrayList<>(graph.length);
 
@@ -73,14 +74,9 @@ public class MatrixLabeler {
                             }
                             qOrder.add(q);
                         }
+                        qComparator.setLabelCounts(labelCount);
+                        qOrder.sort(qComparator);
 
-                        qOrder.sort((o1, o2) -> {
-                            if (labelCount[o1] == labelCount[o2]) {
-                                return o1.compareTo(o2);
-                            } else {
-                                return Integer.compare(labelCount[o1], labelCount[o2]);
-                            }
-                        });
                         for (q = 0; q < qOrder.size(); q++) {
                             qvert = qOrder.get(q);
                             if (qvert == vvert || qvert == wvert || graph[vvert][qvert] == 0) {

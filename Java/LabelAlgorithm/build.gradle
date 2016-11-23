@@ -62,6 +62,42 @@ task hrss_descending(dependsOn: classes, type: JavaExec) {
     args = ['--fnvertices', '--heurdesc', '1', '--vertices', '1000', 'iterations', '100', 'warmup', '20', '--density', '0.5', '--output', fileName]
 }
 
+task hrss_qcompasc(dependsOn: classes, type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+
+    minHeapSize = '1G'
+    maxHeapSize = '8G'
+    main = 'edu.csuci.runner.RunLabeler'
+
+    def date = new Date()
+    def fileName = 'hrss_qcompasc' + date.format('MMddyy_hh:mm:ssa') + '.txt'
+    args = ['--fnvertices', '--qcompasc', '--vertices', '1000', 'iterations', '100', 'warmup', '20', '--density', '0.5', '--output', fileName]
+}
+
+task hrss_ascending_qcompasc(dependsOn: classes, type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+
+    minHeapSize = '1G'
+    maxHeapSize = '8G'
+    main = 'edu.csuci.runner.RunLabeler'
+
+    def date = new Date()
+    def fileName = 'hrss_ascending_qcompasc' + date.format('MMddyy_hh:mm:ssa') + '.txt'
+    args = ['--fnvertices', '--qcompasc', '--heurasc', '1', '--vertices', '1000', 'iterations', '100', 'warmup', '20', '--density', '0.5', '--output', fileName]
+}
+
+task hrss_descending_qcompasc(dependsOn: classes, type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+
+    minHeapSize = '1G'
+    maxHeapSize = '8G'
+    main = 'edu.csuci.runner.RunLabeler'
+
+    def date = new Date()
+    def fileName = 'hrss_descending_qcompasc' + date.format('MMddyy_hh:mm:ssa') + '.txt'
+    args = ['--fnvertices', '--qcompasc', '--heurdesc', '1', '--vertices', '1000', 'iterations', '100', 'warmup', '20', '--density', '0.5', '--output', fileName]
+}
+
 task cgm(dependsOn: classes, type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
 
