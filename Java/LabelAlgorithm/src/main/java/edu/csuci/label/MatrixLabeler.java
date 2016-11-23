@@ -2,9 +2,7 @@ package edu.csuci.label;
 
 import edu.csuci.Heuristic.MatrixHeuristic;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * LabelAlgorithm
@@ -19,9 +17,13 @@ public class MatrixLabeler {
 
         int[] indexes = new int[graph.length];
 
+        int[] labelCount = new int[graph.length];
+
         int[] currentClique = new int[graph.length];
 
         int[] vertexOrder = heuristic.runHeuristic(graph);
+
+        List<Integer> qOrder = new ArrayList<>(graph.length);
 
         int ccIndex = 0;
 
@@ -39,7 +41,9 @@ public class MatrixLabeler {
         for (v = 0; v < vertexOrder.length; v++) {
             vvert = vertexOrder[v];
             if (graph[vvert][vvert] == 0) {
-                labels[vvert][indexes[vvert]++] = lambda;
+                labels[vvert][indexes[vvert]] = lambda;
+                indexes[vvert]++;
+                labelCount[vvert]++;
                 lambda++;
             } else {
                 for (w = v + 1; w < vertexOrder.length; w++) {
@@ -48,19 +52,38 @@ public class MatrixLabeler {
                         continue;
                     }
                     if (connections[vvert][wvert] == 0) {
-                        currentClique[ccIndex++] = wvert;
+                        currentClique[ccIndex] = wvert;
+                        ccIndex++;
+
                         if (indexes[vvert] >= labels[vvert].length) {
                             labels[vvert] = Arrays.copyOf(labels[vvert], labels[vvert].length * 2);
                         }
-                        labels[vvert][indexes[vvert]++] = lambda;
+                        labels[vvert][indexes[vvert]] = lambda;
+                        indexes[vvert]++;
+
                         if (indexes[wvert] >= labels[wvert].length) {
                             labels[wvert] = Arrays.copyOf(labels[wvert], labels[wvert].length * 2);
                         }
-                        labels[wvert][indexes[wvert]++] = lambda;
+                        labels[wvert][indexes[wvert]] = lambda;
+                        indexes[wvert]++;
 
-                        for (q = 0; q < vertexOrder.length; q++) {
-                            qvert = vertexOrder[q];
-                            if (graph[vvert][qvert] == 0) {
+                        for (q = 0; q < graph[vvert].length; q++) {
+                            if (q == vvert || q == wvert || graph[vvert][q] == 0) {
+                                continue;
+                            }
+                            qOrder.add(q);
+                        }
+
+                        qOrder.sort((o1, o2) -> {
+                            if (labelCount[o1] == labelCount[o2]) {
+                                return o1.compareTo(o2);
+                            } else {
+                                return Integer.compare(labelCount[o1], labelCount[o2]);
+                            }
+                        });
+                        for (q = 0; q < qOrder.size(); q++) {
+                            qvert = qOrder.get(q);
+                            if (qvert == vvert || qvert == wvert || graph[vvert][qvert] == 0) {
                                 continue;
                             }
                             isSubset = true;
@@ -71,15 +94,20 @@ public class MatrixLabeler {
                                 }
                             }
                             if (isSubset) {
-                                currentClique[ccIndex++] = qvert;
+                                currentClique[ccIndex] = qvert;
+                                ccIndex++;
+
                                 if (indexes[qvert] >= labels[qvert].length) {
                                     labels[qvert] = Arrays.copyOf(labels[qvert], labels[qvert].length * 2);
                                 }
-                                labels[qvert][indexes[qvert]++] = lambda;
+                                labels[qvert][indexes[qvert]] = lambda;
+                                indexes[qvert]++;
                             }
                         }
 
+                        labelCount[vvert]++;
                         for (cci = 0; cci < ccIndex; cci++) {
+                            labelCount[currentClique[cci]]++;
                             connections[vvert][currentClique[cci]] = 1;
                             connections[currentClique[cci]][vvert] = 1;
                             for (ccj = cci + 1; ccj < ccIndex; ccj++) {
@@ -88,6 +116,7 @@ public class MatrixLabeler {
                             }
                             currentClique[cci] = 0;
                         }
+                        qOrder.clear();
                         ccIndex = 0;
                         lambda++;
                     }
