@@ -8,10 +8,13 @@ import java.util.List;
 import java.util.Set;
 
 /**
+ * LabelAlgorithm
+ * California State University Channel Islands
+ * Constructing an Indeterminate String from its Associated Graph
  * Created by jhelling on 11/22/16.
  */
 public class ListTrial extends TwoStageTrial {
-    private ListGraphGenerator graphGenerator;
+    private final ListGraphGenerator graphGenerator;
     private List<Set<Integer>> labelResult;
 
     public ListTrial(String name, int warmUp, int iterations, boolean debug, PrintStream output,

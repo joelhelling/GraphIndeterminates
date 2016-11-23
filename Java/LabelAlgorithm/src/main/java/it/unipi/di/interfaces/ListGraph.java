@@ -9,7 +9,7 @@ import java.util.Map;
 public class ListGraph implements IntGraph {
 
 	//key: node label, value: list of neighbor's labels
-	private List<List<Integer>> g;
+	private final List<List<Integer>> g;
 	
 	private List<Integer> vertices;
 	private int maxlabel;

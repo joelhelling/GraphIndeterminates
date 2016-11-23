@@ -147,7 +147,7 @@ public class MatrixLabeler {
         res.append("Labels:\n");
 
         for (int i = 0; i < labels.length; i++) {
-            int j = 0;
+            int j;
             res.append(i).append(": [");
             for (j = 0; j < labels[i].length && labels[i][j] != 0; j++) {
                 res.append(labels[i][j]).append(", ");

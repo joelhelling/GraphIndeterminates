@@ -7,11 +7,14 @@ import edu.csuci.label.MatrixLabeler;
 import java.io.PrintStream;
 
 /**
+ * LabelAlgorithm
+ * California State University Channel Islands
+ * Constructing an Indeterminate String from its Associated Graph
  * Created by jhelling on 11/18/16.
  */
 public class MatrixTrial extends TwoStageTrial {
-    private MatrixGraphGenerator graphGenerator;
-    private MatrixHeuristic heuristic;
+    private final MatrixGraphGenerator graphGenerator;
+    private final MatrixHeuristic heuristic;
     private int[][] labelResult;
 
     public MatrixTrial(String name, int warmUp, int iterations, boolean debug, PrintStream output,

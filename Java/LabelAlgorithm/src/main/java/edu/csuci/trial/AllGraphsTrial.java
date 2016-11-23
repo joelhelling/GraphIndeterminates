@@ -5,14 +5,15 @@ import edu.csuci.Heuristic.MatrixHeuristic;
 import edu.csuci.graph.MatrixGraphGenerator;
 import edu.csuci.label.MatrixLabeler;
 
-import java.io.IOException;
 import java.io.PrintStream;
 
 /**
+ * LabelAlgorithm
+ * California State University Channel Islands
+ * Constructing an Indeterminate String from its Associated Graph
  * Created by jhelling on 11/18/16.
  */
 public class AllGraphsTrial implements Trial {
-    private final String name;
     private final int vertices;
     private final boolean debug;
     private final PrintStream output;
@@ -20,8 +21,7 @@ public class AllGraphsTrial implements Trial {
     private final MatrixHeuristic heuristic;
     private int[][] labelResult;
 
-    public AllGraphsTrial(String name, int vertices, boolean debug, PrintStream output, MatrixGraphGenerator graphGenerator) {
-        this.name = name;
+    public AllGraphsTrial(int vertices, boolean debug, PrintStream output, MatrixGraphGenerator graphGenerator) {
         this.vertices = vertices;
         this.debug = debug;
         this.output = output;
@@ -31,7 +31,7 @@ public class AllGraphsTrial implements Trial {
     }
 
     @Override
-    public void runTrial() throws IOException {
+    public void runTrial() {
         System.out.printf("Labeling all graphs on %d vertices", vertices);
         output.printf("Labeling all graphs on %d vertices\n", vertices);
         output.println("Edges -- Labels -- Time (milliseconds)");

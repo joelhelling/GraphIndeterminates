@@ -11,7 +11,7 @@ import java.util.Random;
 public class MatrixGraphGenerator {
     private int vertices;
     private double density;
-    private Random rng;
+    private final Random rng;
     private int[][] graph;
 
     public MatrixGraphGenerator(int vertices, double density) {

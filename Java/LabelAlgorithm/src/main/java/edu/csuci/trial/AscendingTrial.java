@@ -4,16 +4,18 @@ import edu.csuci.Heuristic.MatrixHeuristic;
 import edu.csuci.graph.MatrixGraphGenerator;
 import edu.csuci.label.MatrixLabeler;
 
-import java.io.IOException;
 import java.io.PrintStream;
 import java.math.BigInteger;
 
 /**
+ * LabelAlgorithm
+ * California State University Channel Islands
+ * Constructing an Indeterminate String from its Associated Graph
  * Created by jhelling on 11/18/16.
  */
 public class AscendingTrial extends AbstractTrial {
-    private MatrixGraphGenerator graphGenerator;
-    private MatrixHeuristic heuristic;
+    private final MatrixGraphGenerator graphGenerator;
+    private final MatrixHeuristic heuristic;
     private final int vertices;
     private int[][] labelResult;
 
@@ -26,7 +28,7 @@ public class AscendingTrial extends AbstractTrial {
     }
 
     @Override
-    public void runTrial() throws IOException {
+    public void runTrial() {
         System.out.printf("Trial %s: %d to %d vertices\n", name, 1, vertices);
         output.printf("Trial %s: %d to %d vertices\n", name, 1, vertices);
         output.println("Edges -- Labels -- Time (milliseconds)");

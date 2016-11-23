@@ -5,15 +5,17 @@ import edu.csuci.Heuristic.ShuffleMatrixHeuristic;
 import edu.csuci.graph.MatrixGraphGenerator;
 import edu.csuci.label.MatrixLabeler;
 
-import java.io.IOException;
 import java.io.PrintStream;
 
 /**
+ * LabelAlgorithm
+ * California State University Channel Islands
+ * Constructing an Indeterminate String from its Associated Graph
  * Created by jhelling on 11/18/16.
  */
 public class ShuffleTrial extends AbstractTrial {
-    private MatrixGraphGenerator graphGenerator;
-    private MatrixHeuristic heuristic = new ShuffleMatrixHeuristic();
+    private final MatrixGraphGenerator graphGenerator;
+    private final MatrixHeuristic heuristic = new ShuffleMatrixHeuristic();
     private int[][] labelResult;
 
     public ShuffleTrial(String name, int warmUp, int iterations, boolean debug, PrintStream output, MatrixGraphGenerator graphGenerator) {
@@ -23,7 +25,7 @@ public class ShuffleTrial extends AbstractTrial {
     }
 
     @Override
-    public void runTrial() throws IOException {
+    public void runTrial() {
         testSetup();
         runWarmup();
         runBenchmark();

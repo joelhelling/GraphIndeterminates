@@ -12,10 +12,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * LabelAlgorithm
+ * California State University Channel Islands
+ * Constructing an Indeterminate String from its Associated Graph
  * Created by jhelling on 11/18/16.
  */
 public class CGMTrial extends TwoStageTrial {
-    private MapGraphGenerator graphGenerator;
+    private final MapGraphGenerator graphGenerator;
     private ECCc cliqueSolver;
 
     public CGMTrial(String name, int warmUp, int iterations, boolean debug, PrintStream output,

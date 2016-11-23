@@ -18,32 +18,35 @@ import java.io.PrintStream;
 import java.util.Arrays;
 
 /**
+ * LabelAlgorithm
+ * California State University Channel Islands
+ * Constructing an Indeterminate String from its Associated Graph
  * Created by jhelling on 11/18/16.
  */
 public class CommandLineParser {
-    private OptionSpec<Void> alln;
-    private OptionSpec<Void> nvertices;
-    private OptionSpec<Void> fastVertices;
-    private OptionSpec<Void> shuffleOrder;
-    private OptionSpec<Void> ascending;
-    private OptionSpec<Void> cgm;
-    private OptionSpec<Void> kellermankou;
+    private final OptionSpec<Void> alln;
+    private final OptionSpec<Void> nvertices;
+    private final OptionSpec<Void> fastVertices;
+    private final OptionSpec<Void> shuffleOrder;
+    private final OptionSpec<Void> ascending;
+    private final OptionSpec<Void> cgm;
+    private final OptionSpec<Void> kellermankou;
 
-    private OptionSpec<Integer> ascHeuristic;
-    private OptionSpec<Integer> descHeuristic;
-    private OptionSpec<Void> shuffleHeuristic;
+    private final OptionSpec<Integer> ascHeuristic;
+    private final OptionSpec<Integer> descHeuristic;
+    private final OptionSpec<Void> shuffleHeuristic;
 
-    private OptionSpec<Void> debug;
+    private final OptionSpec<Void> debug;
 
-    private OptionSpec<Void> help;
-    private OptionSpec<Integer> warmUp;
-    private OptionSpec<Integer> iterations;
-    private OptionSpec<Integer> vertices;
-    private OptionSpec<Double> density;
-    private OptionSpec<String> outFile;
+    private final OptionSpec<Void> help;
+    private final OptionSpec<Integer> warmUp;
+    private final OptionSpec<Integer> iterations;
+    private final OptionSpec<Integer> vertices;
+    private final OptionSpec<Double> density;
+    private final OptionSpec<String> outFile;
 
-    private OptionParser parser;
-    private OptionSet options;
+    private final OptionParser parser;
+    private final OptionSet options;
 
     public CommandLineParser(String[] args) {
         parser = new OptionParser();
@@ -89,7 +92,7 @@ public class CommandLineParser {
             parser.printHelpOn(System.out);
         } else if (options.has(alln)) {
             MatrixGraphGenerator mgg = new MatrixGraphGenerator(vertices.value(options), density.value(options));
-            return new AllGraphsTrial("All Graphs", vertices.value(options), options.has(debug), output, mgg);
+            return new AllGraphsTrial(vertices.value(options), options.has(debug), output, mgg);
         } else if (options.has(nvertices)) {
             ListGraphGenerator lgg = new ListGraphGenerator(vertices.value(options), density.value(options));
             return new ListTrial("HRSS", warmUp.value(options), iterations.value(options), options.has(debug), output, lgg);
@@ -119,7 +122,7 @@ public class CommandLineParser {
             try {
                 return new PrintStream(outFile.value(options));
             } catch (FileNotFoundException fnfe) {
-                System.out.println(fnfe);
+                fnfe.printStackTrace();
                 System.out.println("Using System.out instead...");
                 return System.out;
             }

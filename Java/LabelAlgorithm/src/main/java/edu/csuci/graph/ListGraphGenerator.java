@@ -11,8 +11,8 @@ import java.util.*;
 public class ListGraphGenerator {
     private int vertices;
     private double density;
-    private Random rng;
-    private List<Set<Integer>> graph;
+    private final Random rng;
+    private final List<Set<Integer>> graph;
 
     public ListGraphGenerator(int vertices, double density) {
         this.vertices = vertices;

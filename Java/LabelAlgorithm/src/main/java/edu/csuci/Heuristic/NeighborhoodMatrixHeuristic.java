@@ -1,7 +1,6 @@
 package edu.csuci.Heuristic;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -12,8 +11,8 @@ import java.util.List;
  * Created by Joel on 11/09/16.
  */
 public class NeighborhoodMatrixHeuristic implements MatrixHeuristic {
-    private NeighborhoodComparator neighborhoodComparator;
-    private int depth;
+    private final NeighborhoodComparator neighborhoodComparator;
+    private final int depth;
 
     private NeighborhoodMatrixHeuristic(NeighborhoodComparator neighborhoodComparator, int depth) {
         this.neighborhoodComparator = neighborhoodComparator;
@@ -40,7 +39,7 @@ public class NeighborhoodMatrixHeuristic implements MatrixHeuristic {
 
         neighborhoodComparator.setNeighborhoodSizes(neighborhoodSizes);
 
-        Collections.sort(vertexOrder, neighborhoodComparator);
+        vertexOrder.sort(neighborhoodComparator);
         return vertexOrder.stream().mapToInt(x -> x).toArray();
     }
 

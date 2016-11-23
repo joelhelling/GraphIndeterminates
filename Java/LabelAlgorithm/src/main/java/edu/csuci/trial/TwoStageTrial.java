@@ -1,9 +1,11 @@
 package edu.csuci.trial;
 
-import java.io.IOException;
 import java.io.PrintStream;
 
 /**
+ * LabelAlgorithm
+ * California State University Channel Islands
+ * Constructing an Indeterminate String from its Associated Graph
  * Created by jhelling on 11/18/16.
  */
 public abstract class TwoStageTrial extends AbstractTrial {
@@ -12,7 +14,7 @@ public abstract class TwoStageTrial extends AbstractTrial {
     }
 
     @Override
-    public void runTrial() throws IOException {
+    public void runTrial() {
         runWarmup();
         runBenchmark();
     }
