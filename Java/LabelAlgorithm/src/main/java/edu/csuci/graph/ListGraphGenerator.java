@@ -1,6 +1,11 @@
 package edu.csuci.graph;
 
-import java.util.*;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
 
 /**
  * LabelAlgorithm
@@ -12,7 +17,7 @@ public class ListGraphGenerator {
     private int vertices;
     private double density;
     private final Random rng;
-    private final List<Set<Integer>> graph;
+    private List<IntOpenHashSet> graph;
 
     public ListGraphGenerator(int vertices, double density) {
         this.vertices = vertices;
@@ -48,53 +53,37 @@ public class ListGraphGenerator {
         this.density = rng.nextDouble();
     }
 
-    public List<Set<Integer>> getGraph() {
+    public List<IntOpenHashSet> getGraph() {
         return graph;
     }
 
-    public List<Set<Integer>> generateGraph() {
-        int[][] result = new int[vertices][vertices];
+    public List<IntOpenHashSet> generateGraph() {
+        graph = new ArrayList<>(vertices);
+        for (int i = 0; i < vertices; i++) {
+            graph.add(new IntOpenHashSet());
+        }
 
-        for (int i = 0; i < result.length; i++) {
-            for (int j = i + 1; j < result[i].length; j++) {
+        for (int i = 0; i < vertices; i++) {
+            for (int j = i + 1; j < vertices; j++) {
                 if (rng.nextDouble() <= density) {
-                    result[i][i] = 1;
-                    result[j][j] = 1;
-                    result[i][j] = 1;
-                    result[j][i] = 1;
+                    graph.get(i).add(j);
+                    graph.get(j).add(i);
                 }
             }
         }
-        return transformToList(result);
+
+        return graph;
     }
-
-    private List<Set<Integer>> transformToList(int[][] adjMatrix) {
-        List<Set<Integer>> result = new ArrayList<>(adjMatrix.length);
-        for (int i = 0; i < adjMatrix.length; i++) {
-            result.add(i, new HashSet<>(adjMatrix.length));
-        }
-
-        for (int i = 0; i < adjMatrix.length; i++) {
-            for (int j = i + 1; j < adjMatrix[i].length; j++) {
-                if (i != j && adjMatrix[i][j] == 1) {
-                    result.get(i).add(j);
-                    result.get(j).add(i);
-                }
-            }
-        }
-        return result;
-    }
-
 
     public int countEdges() {
         return graph.stream().map(Set::size).reduce(0, (x,y) -> x + y)/2;
     }
 
-    public boolean graphEquals(List<Set<Integer>> other) {
+    public boolean graphEquals(List<IntOpenHashSet> other) {
         return graph.equals(other);
     }
 
-    public static void printGraph(List<Set<Integer>> graph) {
+    public static void printGraph(List<IntOpenHashSet> graph) {
         StringBuilder res = new StringBuilder();
         res.append("Graph:\n");
         int line = 0;

@@ -1,9 +1,12 @@
 package edu.csuci.label;
 
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * LabelAlgorithm
@@ -14,20 +17,20 @@ import java.util.*;
 public class TestListLabeler {
     @Test
     public void givenAnEmptyLabelingShouldReturnEmpty() {
-        List<Set<Integer>> empty = Collections.emptyList();
+        List<IntOpenHashSet> empty = Collections.emptyList();
         Assert.assertEquals(ListLabeler.labelGraph(empty), Collections.emptyList());
     }
 
     @Test
     public void givenAGraphWithNoEdgesShouldReturnOneLabelPerVertex() {
-        List<Set<Integer>> graphNoEdges = new ArrayList<>(10);
+        List<IntOpenHashSet> graphNoEdges = new ArrayList<>(10);
         for (int i = 0; i < 10; i++) {
-            graphNoEdges.add(new HashSet<>());
+            graphNoEdges.add(new IntOpenHashSet());
         }
 
-        List<Set<Integer>> result = new ArrayList<>();
+        List<IntOpenHashSet> result = new ArrayList<>();
         for (int i = 0; i < 10; i++) {
-            result.add(new HashSet<>());
+            result.add(new IntOpenHashSet());
             result.get(i).add(i);
         }
 

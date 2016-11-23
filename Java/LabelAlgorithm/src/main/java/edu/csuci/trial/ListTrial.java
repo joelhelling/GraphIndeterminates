@@ -2,10 +2,10 @@ package edu.csuci.trial;
 
 import edu.csuci.graph.ListGraphGenerator;
 import edu.csuci.label.ListLabeler;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 
 import java.io.PrintStream;
 import java.util.List;
-import java.util.Set;
 
 /**
  * LabelAlgorithm
@@ -15,7 +15,7 @@ import java.util.Set;
  */
 public class ListTrial extends TwoStageTrial {
     private final ListGraphGenerator graphGenerator;
-    private List<Set<Integer>> labelResult;
+    private List<IntOpenHashSet> labelResult;
 
     public ListTrial(String name, int warmUp, int iterations, boolean debug, PrintStream output,
                        ListGraphGenerator graphGenerator) {
@@ -58,7 +58,7 @@ public class ListTrial extends TwoStageTrial {
         if (debug) {
             long start, end;
             start = System.currentTimeMillis();
-            List<Set<Integer>> check = ListLabeler.checkLabeling(labelResult);
+            List<IntOpenHashSet> check = ListLabeler.checkLabeling(labelResult);
             end = System.currentTimeMillis();
             ListGraphGenerator.printGraph(check);
 
