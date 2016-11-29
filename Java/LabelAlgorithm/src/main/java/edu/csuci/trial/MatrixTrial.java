@@ -43,18 +43,19 @@ public class MatrixTrial extends TwoStageTrial {
     }
 
     @Override
-    protected long testRun() {
+    protected TrialResult testRun() {
         long start, end;
         start = System.currentTimeMillis();
         labelResult = MatrixLabeler.labelGraph(graphGenerator.getGraph(), heuristic, qComparator);
         end = System.currentTimeMillis();
         int labels = MatrixLabeler.countLabels(labelResult);
+        TrialResult result = new TrialResult(graphGenerator.countEdges(), labels, end - start);
         System.out.printf("Run: %d Labels; %d ms\n", labels, end - start);
         output.printf("%d\t%d\t%d\n", graphGenerator.countEdges(), labels, end - start);
         if (debug) {
             MatrixLabeler.printLabels(labelResult);
         }
-        return end - start;
+        return result;
     }
 
     @Override

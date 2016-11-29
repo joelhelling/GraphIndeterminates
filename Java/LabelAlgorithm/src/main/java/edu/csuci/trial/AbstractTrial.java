@@ -14,6 +14,7 @@ public abstract class AbstractTrial implements Trial {
     protected final int warmUp;
     protected final boolean debug;
     protected final PrintStream output;
+    protected final TrialStats stats;
 
     public AbstractTrial(String name, int warmUp, int iterations, boolean debug, PrintStream output) {
         this.name = name;
@@ -21,6 +22,7 @@ public abstract class AbstractTrial implements Trial {
         this.iterations = iterations;
         this.debug = debug;
         this.output = output;
+        this.stats = new TrialStats();
     }
 
     @Override

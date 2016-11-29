@@ -39,18 +39,19 @@ public class ListTrial extends TwoStageTrial {
     }
 
     @Override
-    protected long testRun() {
+    protected TrialResult testRun() {
         long start, end;
         start = System.currentTimeMillis();
         labelResult = ListLabeler.labelGraph(graphGenerator.getGraph());
         end = System.currentTimeMillis();
         int labels = ListLabeler.countLabels(labelResult);
+        TrialResult result = new TrialResult(graphGenerator.countEdges(), labels, end - start);
         System.out.printf("Run: %d Labels; %d ms\n", labels, end - start);
         output.printf("%d\t%d\t%d\n", graphGenerator.countEdges(), labels, end - start);
         if (debug) {
             ListLabeler.printLabels(labelResult);
         }
-        return end - start;
+        return result;
     }
 
     @Override

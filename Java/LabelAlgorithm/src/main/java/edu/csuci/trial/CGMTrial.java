@@ -44,7 +44,7 @@ public class CGMTrial extends TwoStageTrial {
     }
 
     @Override
-    protected long testRun() {
+    protected TrialResult testRun() {
         long start, end;
 
         start = System.currentTimeMillis();
@@ -52,13 +52,14 @@ public class CGMTrial extends TwoStageTrial {
         int removed = CoverUtils.minimalize(cliqueSolver.solution());
         end = System.currentTimeMillis();
         List<IntOpenHashSet> cliqueResult = cliqueSolver.solution();
+        TrialResult result = new TrialResult(graphGenerator.countEdges(), cliqueResult.size(), end - start);
         System.out.printf("Run: %d Cliques; %d ms with %d redundant cliques\n", cliqueResult.size(), end - start,
                 removed);
         output.printf("%d\t%d\t%d\n", graphGenerator.countEdges(), cliqueResult.size(), end - start);
         if (debug) {
             cliqueResult.forEach(x -> System.out.println(Arrays.toString(x.toIntArray())));
         }
-        return end - start;
+        return result;
     }
 
     @Override

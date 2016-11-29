@@ -40,19 +40,20 @@ public class KKTrial extends TwoStageTrial {
     }
 
     @Override
-    protected long testRun() {
+    protected TrialResult testRun() {
         long start, end;
         start = System.currentTimeMillis();
         List<IntOpenHashSet> cliqueResult = KellermanKouAlgorithm.coverGraph(graphGenerator.getGraph());
         int removed = CoverUtils.minimalize(cliqueResult);
         end = System.currentTimeMillis();
+        TrialResult result = new TrialResult(graphGenerator.countEdges(), cliqueResult.size(), end - start);
         if (debug) {
             cliqueResult.forEach(x -> System.out.println(Arrays.toString(x.toIntArray())));
         }
         System.out.printf("Run: %d Cliques; %d ms with %d redundant cliques\n", cliqueResult.size(), end - start,
                 removed);
         output.printf("%d\t%d\t%d\n", graphGenerator.countEdges(), cliqueResult.size(), end - start);
-        return end - start;
+        return result;
     }
 
     @Override

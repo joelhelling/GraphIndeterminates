@@ -19,6 +19,7 @@ public class AllGraphsTrial implements Trial {
     private final int vertices;
     private final boolean debug;
     private final PrintStream output;
+    private final TrialStats stats;
     private final MatrixGraphGenerator graphGenerator;
     private final MatrixHeuristic heuristic;
     private final QComparator qComparator;
@@ -28,6 +29,7 @@ public class AllGraphsTrial implements Trial {
         this.vertices = vertices;
         this.debug = debug;
         this.output = output;
+        this.stats = new TrialStats();
         this.graphGenerator = graphGenerator;
         this.heuristic = new DummyMatrixHeuristic();
         this.qComparator = new DummyComparator();
@@ -40,16 +42,14 @@ public class AllGraphsTrial implements Trial {
         output.printf("Labeling all graphs on %d vertices\n", vertices);
         output.println("Edges -- Labels -- Time (milliseconds)");
 
-        long total = 0;
-
         long numGraphs = (long) Math.pow(2, vertices*(vertices - 1)/2);
         for (long i = 0; i < numGraphs; i++) {
             testSetup(i);
-            total += testRun();
+            stats.updateStats(testRun());
             testCheck();
         }
-        System.out.printf("Total Time: %d ms\n", total);
-        System.out.printf("Average Time per Graph: %d ms\n",  total/numGraphs);
+        stats.printStats(System.out);
+        stats.printStats(output);
     }
 
     private void testSetup(long bits) {
@@ -65,18 +65,19 @@ public class AllGraphsTrial implements Trial {
         }
     }
 
-    private long testRun() {
+    private TrialResult testRun() {
         long start, end;
         start = System.currentTimeMillis();
         labelResult = MatrixLabeler.labelGraph(graphGenerator.getGraph(), heuristic, qComparator);
         end = System.currentTimeMillis();
         int labels = MatrixLabeler.countLabels(labelResult);
+        TrialResult result = new TrialResult(graphGenerator.countEdges(), labels, end - start);
         System.out.printf("Run: %d Labels; %d ms\n", labels, end - start);
         output.printf("%d\t%d\t%d\n", graphGenerator.countEdges(), labels, end - start);
         if (debug) {
             MatrixLabeler.printLabels(labelResult);
         }
-        return end - start;
+        return result;
     }
 
     private void testCheck() {

@@ -30,22 +30,19 @@ public abstract class TwoStageTrial extends AbstractTrial {
     private void run(String trialType, int runs) {
         System.out.printf("Trial %s: %s\n", name, trialType);
         output.printf("Trial %s: %s\n", name, trialType);
-        long total;
-
-        total = 0;
 
         for (int i = 0; i < runs; i++) {
             testSetup();
-            total += testRun();
+            stats.updateStats(testRun());
             testCheck();
         }
-        System.out.printf("Total %s Time: %d ms\n", trialType, total);
-        System.out.printf("Average %s Time per Graph: %d ms\n", trialType, total/runs);
+        stats.printStats(System.out);
+        stats.printStats(output);
     }
 
     protected abstract void testSetup();
 
-    protected abstract long testRun();
+    protected abstract TrialResult testRun();
 
     protected abstract void testCheck();
 }

@@ -12,7 +12,7 @@ public class MapGraphGenerator {
     private int vertices;
     private double density;
     private final Random rng;
-    private final Map<Integer, List<Integer>> graph;
+    private Map<Integer, List<Integer>> graph;
 
     public MapGraphGenerator(int vertices, double density) {
         this.vertices = vertices;
@@ -65,7 +65,8 @@ public class MapGraphGenerator {
                 }
             }
         }
-        return transformToList(result);
+        graph = transformToList(result);
+        return graph;
     }
 
     private Map<Integer, List<Integer>> transformToList(int[][] adjMatrix) {
