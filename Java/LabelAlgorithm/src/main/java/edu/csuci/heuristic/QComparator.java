@@ -10,6 +10,11 @@ import java.util.Comparator;
  */
 public abstract class QComparator implements Comparator<Integer> {
     protected int[] labelCounts;
+    protected int[] neighborhoodSizes;
+
+    public void setNeighborhoodSizes(int[] neighborhoodSizes) {
+        this.neighborhoodSizes = neighborhoodSizes;
+    }
 
     public void setLabelCounts(int[] labelCounts) {
         this.labelCounts = labelCounts;

@@ -1,6 +1,7 @@
 package edu.csuci.label;
 
 import edu.csuci.heuristic.MatrixHeuristic;
+import edu.csuci.heuristic.NeighborhoodSizer;
 import edu.csuci.heuristic.QComparator;
 
 import java.util.*;
@@ -23,6 +24,9 @@ public class MatrixLabeler {
         int[] currentClique = new int[graph.length];
 
         int[] vertexOrder = vHeuristic.runHeuristic(graph);
+
+        int[] neighborhoodSizes = NeighborhoodSizer.calcNeighborhoodSizes(graph, 1);
+        qComparator.setNeighborhoodSizes(neighborhoodSizes);
 
         List<Integer> qOrder = new ArrayList<>(graph.length);
 

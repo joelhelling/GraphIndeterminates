@@ -30,48 +30,16 @@ public class NeighborhoodMatrixHeuristic implements MatrixHeuristic {
     @Override
     public int[] runHeuristic(int[][] graph) {
         List<Integer> vertexOrder = new ArrayList<>(graph.length);
-        final int[] neighborhoodSizes = new int[graph.length];
 
         for (int i = 0; i < graph.length; i++) {
             vertexOrder.add(i);
-            neighborhoodSizes[i] = countNeighborhood(graph, i, depth);
         }
 
-        neighborhoodComparator.setNeighborhoodSizes(neighborhoodSizes);
+        neighborhoodComparator.setNeighborhoodSizes(NeighborhoodSizer.calcNeighborhoodSizes(graph, depth));
 
         vertexOrder.sort(neighborhoodComparator);
         return vertexOrder.stream().mapToInt(x -> x).toArray();
     }
-
-    private int countNeighborhood(int[][] graph, int vertex, int depth) {
-        int[] frontier = new int[graph.length];
-
-        frontier[vertex] = 1;
-
-        int neighborhoodCount = 1;
-        boolean isEmpty = false;
-
-        for (int currentDepth = 1; currentDepth <= depth; currentDepth++) {
-            if (isEmpty) {
-                break;
-            } else {
-                isEmpty = true;
-                for (int j = 0; j < frontier.length; j++) {
-                    if (frontier[j] == currentDepth) {
-                        for (int k = 0; k < graph[j].length; k++) {
-                            if (k != j && graph[j][k] != 0 && frontier[k] == 0) {
-                                isEmpty = false;
-                                neighborhoodCount += 1;
-                                frontier[k] = currentDepth + 1;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return neighborhoodCount;
-    }
-
 
     private static abstract class NeighborhoodComparator implements Comparator<Integer> {
         protected int[] neighborhoodSizes;
