@@ -34,7 +34,7 @@ task hrss(dependsOn: classes, type: JavaExec) {
     main = 'edu.csuci.runner.RunLabeler'
 
     def date = new Date()
-    def fileName = 'hrss_' + date.format('MMddyy_hh:mm:ssa') + '.txt'
+    def fileName = 'hrss_' + date.format('MMddyy_hh_mm_ssa') + '.txt'
     args = ['--fnvertices', '--vertices', '1000', 'iterations', '100', 'warmup', '20', '--density', '0.5', '--output', fileName]
 }
 
@@ -131,7 +131,19 @@ task ascending(dependsOn: classes, type: JavaExec) {
 
     def date = new Date()
     def fileName = 'ascending_' + date.format('MMddyy_hh_mm_ssa') + '.txt'
-    args = ['--ascending', '--vertices', '1000', 'iterations', '100', 'warmup', '20', '--output', fileName]
+    args = ['--ascending', '--qcompasc', '--heurdesc', '1', '--vertices', '1000', 'iterations', '100', 'warmup', '20', '--output', fileName]
+}
+
+task all_graphs_on_n_vertices(dependsOn: classes, type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+
+    minHeapSize = '1G'
+    maxHeapSize = '8G'
+    main = 'edu.csuci.runner.RunLabeler'
+
+    def date = new Date()
+    def fileName = 'all_n_' + date.format('MMddyy_hh_mm_ssa') + '.txt'
+    args = ['--alln', '--vertices', '7', '--output', fileName]
 }
 
 task shuffle(dependsOn: classes, type: JavaExec) {

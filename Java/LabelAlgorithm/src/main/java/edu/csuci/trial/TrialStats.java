@@ -31,8 +31,8 @@ public class TrialStats {
 
     public void printStats(PrintStream output) {
         output.printf("Total Time: %d ms\n", time);
-        output.printf("Average Edges per Graph: %d Edges\n", edges/iterations);
-        output.printf("Average Labels per Graph: %d Labels\n", labels/iterations);
-        output.printf("Average Time per Graph: %d ms\n", time/iterations);
+        output.printf("Average Edges per Graph: %f Edges\n", (double) edges/iterations);
+        output.printf("Average Labels per Graph: %f Labels\n", (double) labels/iterations);
+        output.printf("Average Time per Graph: %f ms\n", (double) time/iterations);
    }
 }

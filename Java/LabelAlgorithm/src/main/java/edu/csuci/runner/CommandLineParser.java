@@ -61,17 +61,17 @@ public class CommandLineParser {
         kellermankou = parser.accepts("kk", "Run the edge clique covering algorithm described in Covering Edges by Cliques with Regard to Keyword Conflicts and Intersection Graphs");
 
         ascHeuristic = parser.accepts("heurasc", "Runs the labeling algorithm with the vertices ordered by ascending neighborhood size with a specified depth")
-                .availableIf(fastVertices).withRequiredArg().ofType(Integer.class).defaultsTo(0);
+                .availableIf(fastVertices).availableIf(ascending).withRequiredArg().ofType(Integer.class).defaultsTo(0);
         descHeuristic = parser.accepts("heurdesc", "Runs the labeling algorithm with the vertices ordered by descending neighborhood size with a specified depth")
-                .availableIf(fastVertices).withRequiredArg().ofType(Integer.class).defaultsTo(0);
+                .availableIf(fastVertices).availableIf(ascending).withRequiredArg().ofType(Integer.class).defaultsTo(0);
         shuffleHeuristic = parser.accepts("heurshuffle", "Runs the labeling algorithm with the vertices ordered randomly")
                 .availableIf(fastVertices).availableIf(shuffleOrder);
 
 
         ascQComp = parser.accepts("qcompasc", "Runs the labeling algorithm with q vertices ordered by the number the labels the vertex currently has ascending")
-                .availableIf(fastVertices);
+                .availableIf(fastVertices).availableIf(ascending);
         descQComp = parser.accepts("qcompdesc", "Runs the labeling algorithm with q vertices ordered by the number the labels the vertex currently has descending")
-                .availableIf(fastVertices);
+                .availableIf(fastVertices).availableIf(ascending);
 
 
         debug = parser.accepts("debug", "If specified, runs checking algorithm and prints out results");
