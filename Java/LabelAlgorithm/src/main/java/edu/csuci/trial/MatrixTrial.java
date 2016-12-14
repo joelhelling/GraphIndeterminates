@@ -4,8 +4,11 @@ import edu.csuci.graph.MatrixGraphGenerator;
 import edu.csuci.heuristic.MatrixHeuristic;
 import edu.csuci.heuristic.QComparator;
 import edu.csuci.label.MatrixLabeler;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import it.unipi.di.export.CoverUtils;
 
 import java.io.PrintStream;
+import java.util.List;
 
 /**
  * LabelAlgorithm
@@ -49,6 +52,10 @@ public class MatrixTrial extends TwoStageTrial {
         labelResult = MatrixLabeler.labelGraph(graphGenerator.getGraph(), heuristic, qComparator);
         end = System.currentTimeMillis();
         int labels = MatrixLabeler.countLabels(labelResult);
+        List<IntOpenHashSet> cliques = MatrixLabeler.convertToListOfSets(labels, labelResult);
+        int removed = CoverUtils.minimalize(cliques);
+        System.out.println("Removed " + removed);
+        labels = labels - removed;
         TrialResult result = new TrialResult(graphGenerator.countEdges(), labels, end - start);
         System.out.printf("Run: %d Labels; %d ms\n", labels, end - start);
         output.printf("%d\t%d\t%d\n", graphGenerator.countEdges(), labels, end - start);

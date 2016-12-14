@@ -2,6 +2,7 @@ package edu.csuci.label;
 
 import edu.csuci.heuristic.MatrixHeuristic;
 import edu.csuci.heuristic.QComparator;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 
 import java.util.*;
 
@@ -165,6 +166,24 @@ public class MatrixLabeler {
             }
         }
         return count.size();
+    }
+
+    public static List<IntOpenHashSet> convertToListOfSets(int numberOfLabels, int[][] labels) {
+        List<IntOpenHashSet> result = new ArrayList<>(numberOfLabels);
+        for (int i = 0; i < numberOfLabels; i++) {
+            result.add(new IntOpenHashSet());
+        }
+
+        for (int i = 0; i < labels.length; i++) {
+            for (int j = 0; j < labels[i].length; j++) {
+                if (labels[i][j] == 0) {
+                    break;
+                }
+                int label = labels[i][j];
+                result.get(label-1).add(i);
+            }
+        }
+        return result;
     }
 
     public static void printLabels(int[][] labels) {
